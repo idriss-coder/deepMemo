@@ -1,6 +1,7 @@
 import type {Metadata, Viewport} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
+import {TransitionWrapper} from "@/components/customize/transition-wrapper";
 
 const APP_NAME = "PWA App";
 const APP_DEFAULT_TITLE = "My Awesome PWA App";
@@ -44,7 +45,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-    themeColor: "#FFFFFF",
+    themeColor: "#141F25",
 };
 
 
@@ -68,9 +69,11 @@ export default function RootLayout({
   return (
       <html lang="en">
       <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-bgPrimary text-white`}
       >
-      {children}
+      <TransitionWrapper>
+          {children}
+      </TransitionWrapper>
       </body>
       </html>
   );

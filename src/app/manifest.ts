@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
         description: 'Next.js App',
         start_url: '/',
         display: 'standalone',
-        background_color: '#fff',
-        theme_color: '#fff',
+        background_color: '#141F25',
+        theme_color: '#4abef7',
         icons: [
             {
                 src: "/android-chrome-192x192.png",
