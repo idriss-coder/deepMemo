@@ -23,7 +23,7 @@ export default function LoginPage() {
             </div>
             <div className={"flex flex-col gap-3"}>
                 <Button onClick={onLogin} variant={"default"}>Se conecter</Button>
-                <Link href={"/register"} className={"flex items-center justify-center w-full"}>
+                <Link href={"/auth/register"} className={"flex items-center justify-center w-full"}>
                     <Button variant={"text"}>Je n'ai pas encore de compte</Button>
                 </Link>
             </div>

@@ -131,7 +131,7 @@ export default function UseTermPage() {
             <div
                 className={"h-[200px] p-[20px] flex flex-col gap-2 items-center justify-end bg-gradient-to-b from-[#141f25]/0 via-[#141f25] to-[#141f25] fixed bottom-0 w-full"}>
                 <Button onClick={onAcceptUserTerm} variant={"default"} className={"w-full"}>Accepter</Button>
-                <Link href={"/login"}>
+                <Link href={"/auth/login"}>
                     <Button variant={"textRed"} className={"w-full"}>Refuser</Button>
                 </Link>
             </div>
