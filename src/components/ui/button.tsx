@@ -11,8 +11,16 @@ const buttonVariants = cva(
             variant: {
                 default:
                     "bg-lPrimary text-bgPrimary hover:bg-lPrimary/90 text-base font-bold tracking-wide border-b-4 border-b-lPrimarySecondary active:border-b-0",
+                purple:
+                    "bg-[white] text-[#5f3a9a] hover:bg-white/90 text-base font-bold tracking-wide border-2 border-b-4 border-lPrimarySecondary  border-[#d0cfd4]  active:border-b-2",
+                neutral:
+                    "bg-transparent text-white/90  text-base font-bold tracking-wide border-2 border-b-4  active:border-b-2",
                 text:
                     "bg-transparent text-lPrimary hover:text-lPrimary/85 text-lPrimary text-base font-bold tracking-wide border-b-4 border-b-transparent active:border-b-0",
+                dashed:
+                    "bg-transparent text-white text-base font-bold tracking-wide border-2 border-b-4 border-[#38454e] border-dashed active:border-b-2",
+                disabled:
+                    "bg-[#38454e] text-lPrimary text-[#54656d] text-base font-bold tracking-wide border-b-4 border-b-transparent active:border-b-0",
                 textRed:
                     "bg-transparent text-lRed hover:text-lRed/85 text-base font-bold tracking-wide border-b-4 border-b-transparent active:border-b-0",
                 destructive:

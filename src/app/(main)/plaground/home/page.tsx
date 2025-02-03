@@ -1,5 +1,6 @@
 import {DBook} from "@/components/customize/icons";
 import {cn} from "@/lib/utils";
+import Link from "next/link";
 
 export default function HomPage() {
 
@@ -8,12 +9,15 @@ export default function HomPage() {
             <TrainingUser/>
             <div className={"px-[20px] py-[34px]"}>
                 <div className={"flex flex-col gap-[15px]"}>
+
                     <div>
                         <h1 className="text-white text-xl font-bold font-['Feather']">Entrainements</h1>
                     </div>
 
                     <div>
-                        <TrainingItem/>
+                        <Link href={"/plaground/home/verses-list"}>
+                            <TrainingItem/>
+                        </Link>
                     </div>
                 </div>
             </div>

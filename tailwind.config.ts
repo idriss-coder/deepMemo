@@ -10,6 +10,14 @@ export default {
   theme: {
   	extend: {
   		colors: {
+			gray: {
+				700: "#374151",
+				800: "#1F2937",
+				900: "#111827",
+			},
+			teal: {
+				400: "#40E0D0",
+			},
 			bgPrimary: "#141F25",
 			lPrimary: "#4ABEF7",
 			lRed: "#CE5D55",
