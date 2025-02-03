@@ -84,7 +84,7 @@ export default function VersetInfos() {
                                 onChange={e => setDescription(e.currentTarget.value)}
                                 autoFocus={true}
                             />
-                            <div className="w-[341px] text-[#4e5b64] text-sm font-normal leading-snug">
+                            <div className="text-[#4e5b64] text-sm font-normal leading-snug">
                                 Vous n&apos;etes pas oubligé de mettre le contenu du verset dans son entiereté, juste un
                                 aperçu pour
                                 vous rappeler rapidment
