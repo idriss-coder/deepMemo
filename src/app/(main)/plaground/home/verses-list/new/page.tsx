@@ -36,7 +36,7 @@ const SearchSuggestion = () => {
 
 const SuggestionList = () => {
     return (
-        <div className={"flex flex-col gap-[5px]"}>
+        <div className={"flex flex-col gap-[18px]"}>
             <SuggestionItem/>
             <SuggestionItem/>
             <SuggestionItem/>
@@ -49,16 +49,16 @@ const SuggestionItem = () => {
 
     return (
         <div className={"flex items-center justify-between"}>
-            <div className={"flex gap-[8ox] items-center"}>
-                <DHeartGray/>
+            <div className={"flex gap-[8px] items-center"}>
+                <DHeartGray className={"text-sm"} width={46} height={42}/>
                 <div className={"flex flex-col gap-[4px]"}>
                     <div className="text-white text-base font-bold font-['Feather']">Genese</div>
                     <div className="text-[#4e5b64] text-sm font-normal">50 chap.</div>
                 </div>
             </div>
             <Link href={"/plaground/home/verses-list/new/infos"}>
-                <Button>
-                    <DArrowGoIcon/>
+                <Button size={"sm"}>
+                    <DArrowGoIcon className={"scale-150"}/>
                 </Button>
             </Link>
         </div>

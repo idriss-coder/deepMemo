@@ -11,10 +11,16 @@ const buttonVariants = cva(
             variant: {
                 default:
                     "bg-lPrimary text-bgPrimary hover:bg-lPrimary/90 text-base font-bold tracking-wide border-b-4 border-b-lPrimarySecondary active:border-b-0",
+                green:
+                    "bg-[#92d233] text-bgPrimary hover:bg-[#92d233]/90 text-base font-bold tracking-wide border-2 border-b-4 border-[#7aba2a] active:border-b-2",
+                red:
+                    "bg-[#F4535C] text-bgPrimary hover:bg-[#F4535C]/90 text-base font-bold tracking-wide border-2 border-b-4 border-[#D74641] active:border-b-2",
                 purple:
                     "bg-[white] text-[#5f3a9a] hover:bg-white/90 text-base font-bold tracking-wide border-2 border-b-4 border-lPrimarySecondary  border-[#d0cfd4]  active:border-b-2",
                 neutral:
                     "bg-transparent text-white/90  text-base font-bold tracking-wide border-2 border-b-4  active:border-b-2",
+                selected:
+                    "bg-[#213037] text-[#1b93cf]  text-base font-bold tracking-wide border-2 border-b-4 border-[#45829d] active:border-b-2",
                 text:
                     "bg-transparent text-lPrimary hover:text-lPrimary/85 text-lPrimary text-base font-bold tracking-wide border-b-4 border-b-transparent active:border-b-0",
                 dashed:
@@ -35,7 +41,7 @@ const buttonVariants = cva(
             size: {
                 default: "h-[50px] rounded-xl px-4 py-2",
                 sm: "h-9 rounded-md px-3",
-                lg: "h-11 rounded-md px-8",
+                lg: "h-[79px] rounded-xl px-4 py-2",
                 icon: "h-10 w-10",
             },
         },

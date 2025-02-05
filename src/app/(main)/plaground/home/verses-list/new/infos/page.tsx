@@ -90,24 +90,25 @@ export default function VersetInfos() {
                                 vous rappeler rapidment
                             </div>
                         </div>
-                        <motion.div
-                            className="h-[140px] p-[20px] flex flex-col gap-2 items-center justify-center bg-gradient-to-b from-[#141f25]/0 via-[#141f25] to-[#141f25] fixed bottom-0 right-0 w-full"
-                            initial={{opacity: 0, y: 0}}
-                            animate={{opacity: 1, y: 0}}
-                            transition={{delay: 0.2, duration: 0.3}}
-                        >
-                            {<Button
-                                variant={!description ? "disabled" : "default"}
-                                className="w-full"
-                                disabled={!description}
-                                onClick={() => console.log("Ajouter le verset")}
-                            >
-                                Ajouter le verset
-                            </Button>}
-                        </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {curStep === 3 && <motion.div
+                className="h-[140px] p-[20px] flex flex-col gap-2 items-center justify-center bg-gradient-to-b from-[#141f25]/0 via-[#141f25] to-[#141f25] fixed bottom-0 right-0 w-full"
+                initial={{opacity: 0, y: 0}}
+                animate={{opacity: 1, y: 0}}
+                transition={{delay: 0.2, duration: 0.3}}
+            >
+                {<Button
+                    variant={!description ? "disabled" : "default"}
+                    className="w-full"
+                    disabled={!description}
+                    onClick={() => console.log("Ajouter le verset")}
+                >
+                    Ajouter le verset
+                </Button>}
+            </motion.div>}
         </div>
     )
 }

@@ -1,7 +1,10 @@
+"use client"
+
 import {DArrowTop, DBook, DHeartGray} from "@/components/customize/icons";
 import {Button} from "@/components/ui/button";
 import {BackButton} from "@/components/customize/utils";
 import Link from "next/link";
+import {useRouter} from "next/navigation";
 
 export default function VersetListPage() {
 
@@ -20,6 +23,8 @@ export default function VersetListPage() {
 
 const HeroSection = () => {
 
+    const $router = useRouter()
+
     return (
         <div
             className={"h-[380px] px-[18px] bg-gradient-to-b from-[#5f3a9a] to-[#1a143a]"}>
@@ -35,7 +40,16 @@ const HeroSection = () => {
                     memoriser les versets par coeur.
                 </div>
 
-                <Button variant={"purple"} disabled={false} className={"w-full"}>DEMARRER L’ENTRAINEMENT</Button>
+                <Button
+                    variant={"purple"}
+                    disabled={false}
+                    className={"w-full"}
+                    onClick={() => {
+                        $router.push("/plaground/home/verses-list/play");
+                    }}
+                >
+                    DEMARRER L’ENTRAINEMENT
+                </Button>
             </div>
         </div>
     )
@@ -94,7 +108,9 @@ const VersetItem = () => {
         <div>
             <Button variant={"neutral"} className={"w-full flex justify-between border-[#38454e]"}>
                 <div>Mat. 24:14</div>
-                <DHeartGray className={"text-3xl"} width={100} height={100}/>
+                <div className={"text-5xl"}>
+                    <DHeartGray/>
+                </div>
             </Button>
         </div>
     )
