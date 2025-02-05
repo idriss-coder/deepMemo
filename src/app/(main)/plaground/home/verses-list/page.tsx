@@ -109,7 +109,7 @@ const VersetItem = () => {
             <Button variant={"neutral"} className={"w-full flex justify-between border-[#38454e]"}>
                 <div>Mat. 24:14</div>
                 <div className={"text-5xl"}>
-                    <DHeartGray/>
+                    <DHeartGray className={"scale-[2]"}/>
                 </div>
             </Button>
         </div>
