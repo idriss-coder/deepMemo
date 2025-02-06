@@ -15,6 +15,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import React, {useState} from "react";
 import {cn} from "@/lib/utils";
 import {useRouter} from "next/navigation";
+import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
 
 export default function PlayPage() {
 
@@ -248,62 +249,29 @@ const EndStateScreen: React.FC<{
 }
 
 
-const ClosePartyScreen: React.FC<{ state?: "closed" | "opened", onCloseCancel: () => void }> = ({
+const ClosePartyScreen: React.FC<{ state: "closed" | "opened", onCloseCancel: () => void }> = ({
                                                                                                     state,
                                                                                                     onCloseCancel
                                                                                                 }) => {
 
-    const isOpened = state === "opened"
     const $router = useRouter()
 
     return (
-        <TransitionScreen className={cn(
-            "bg-black/80",
-            isOpened ? "h-screen" : "h-0 overflow-hidden"
-        )}>
-            <div className={cn(
-                "w-full h-fit p-5 pb-10 py-[30px] flex flex-col justify-between bg-[#141f25] rounded-t-lg overflow-hidden",
-                isOpened ? "h-fit" : "h-[0%]"
-            )}>
-
-                <div className={"flex flex-col items-center gap-[20px]"}>
-                    <DXPIcon/>
-                    <div className={"flex flex-col gap-[29px]"}>
-                        <div className={"flex flex-col gap-[17px]"}>
-                            <div className="text-white text-xl font-bold font-['Feather'] text-center">
-                                Tu veux vraiment arrêter ?
-                            </div>
-                            <div className="text-center text-[#4e5b64] text-sm font-normal leading-snug">
-                                Si tu arrete maintenant, tu perdras toutes ta progression et lors de ton prochain
+        <CloseConfirm
+            state={state}
+            onCloseCancel={onCloseCancel}
+            icon={<DXPIcon/>}
+            title={"Tu veux vraiment arrêter ?"}
+            subTitle={` Si tu arrete maintenant, tu perdras toutes ta progression et lors de ton prochain
                                 entrainement
                                 tu
-                                devras recommencer to progrssion à zéro.
-                            </div>
-                        </div>
-
-                        <div className={"flex flex-col gap-[20px]"}>
-                            <Button
-                                variant={"green"}
-                                className="w-full"
-                                onClick={onCloseCancel}
-                            >
-                                Continuer
-                            </Button>
-                            <Button
-                                variant={"textRed"}
-                                className="w-full"
-                                onClick={() => {
-                                    $router.push("/plaground/home/verses-list")
-                                }}
-                            >
-                                Terminer la session
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </TransitionScreen>
+                                devras recommencer to progrssion à zéro.`}
+            cancelText={"Continuer"}
+            performText={"Terminer la session"}
+            performAction={() => {
+                $router.push("/plaground/home/verses-list")
+            }}
+        />
     )
 }
 
@@ -378,11 +346,3 @@ const StatItem: React.FC<{ icon: React.ReactNode, title: React.ReactNode, desc: 
     )
 }
 
-const TransitionScreen: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({children, className}) => {
-    return (
-        <div
-            className={cn("h-screen w-full absolute top-0 left-0 flex justify-between items-end", className)}>
-            {children}
-        </div>
-    )
-}

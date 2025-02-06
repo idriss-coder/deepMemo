@@ -5,23 +5,41 @@ import {Button} from "@/components/ui/button";
 import {BackButton} from "@/components/customize/utils";
 import Link from "next/link";
 import {useRouter} from "next/navigation";
+import React, {useMemo} from "react";
+import {Verset} from "@/lib/db";
+import {Book, bookMapById} from "@/backend/mock/bible-book";
+import {useVerses} from "@/hooks/useVerses";
 
 export default function VersetListPage() {
+    const {myVerses} = useVerses()
 
     return (
         <div>
-            <HeroSection/>
-            <div className={"px-[20px] mt-[20px] flex flex-col gap-[24.5px]"}>
-                <NavSection/>
+            <HeroSection verses={myVerses}/>
+            <div className={"px-[20px] mt-[20px] flex flex-col gap-3"}>
+                <NavSection versetCount={myVerses.length}/>
                 <NewVerset/>
-                <EmptyVerses/>
-                <VersetItem/>
+                {myVerses.length == 0 && <EmptyVerses/>}
+                <VersetListView verses={myVerses}/>
             </div>
         </div>
     )
 }
 
-const HeroSection = () => {
+const VersetListView: React.FC<{ verses: Verset[] }> = ({verses}) => {
+    return (
+        <div className={"flex flex-col gap-3"}>
+            {verses.map(v => (
+                <VersetItem
+                    verset={v}
+                    key={v.id}
+                />
+            ))}
+        </div>
+    )
+}
+
+const HeroSection: React.FC<{ verses: Verset[] }> = ({verses}) => {
 
     const $router = useRouter()
 
@@ -41,8 +59,8 @@ const HeroSection = () => {
                 </div>
 
                 <Button
-                    variant={"purple"}
-                    disabled={false}
+                    variant={verses.length ? "purple" : "disabled"}
+                    disabled={!verses.length}
                     className={"w-full"}
                     onClick={() => {
                         $router.push("/plaground/home/verses-list/play");
@@ -55,24 +73,23 @@ const HeroSection = () => {
     )
 }
 
-const NavSection = () => {
-
+const NavSection: React.FC<{ versetCount: number }> = ({versetCount}) => {
     return (
         <div className={"flex justify-between items-center"}>
             <div className="text-white text-xl font-bold font-['Feather']">Mes versets</div>
-            <VersetCount/>
+            <VersetCount count={versetCount}/>
         </div>
     )
 }
 
-const VersetCount = () => {
+const VersetCount: React.FC<{ count: number }> = ({count}) => {
 
     return (
         <div
             className={"w-[47px] h-6 p-0.5 bg-gradient-to-r from-[#2dabbc] to-[#42e1b1] rounded-sm flex-col justify-start items-start gap-2.5 inline-flex overflow-hidden"}>
             <div
                 className="h-full w-full bg-black rounded-[1px] flex justify-center items-center">
-                <div className="text-white text-xl font-bold font-['Feather']">00</div>
+                <div className="text-white text-xl font-bold font-['Feather']">{count}</div>
             </div>
         </div>
     )
@@ -102,12 +119,29 @@ const EmptyVerses = () => {
     )
 }
 
-const VersetItem = () => {
+const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
+
+    const versetTitle = useMemo(() => {
+        return `${verset.chapter_num ? verset.chapter_num + "" : ""} ${
+            verset.verses_num ? ": " + verset.verses_num[0] + (verset.verses_num.length > 1 ? "-" + verset.verses_num[verset.verses_num.length - 1] : "") : ""
+        } `
+    }, [verset])
+
+    const $router = useRouter()
+
+    const book = bookMapById.get(verset.book_num) as Book
+
 
     return (
         <div>
-            <Button variant={"neutral"} className={"w-full flex justify-between border-[#38454e]"}>
-                <div>Mat. 24:14</div>
+            <Button
+                variant={"neutral"}
+                className={"w-full flex justify-between border-[#38454e]"}
+                onClick={() => {
+                    $router.push((`/plaground/home/verses-list/new/infos?book_id=${verset.book_num}&verset_id=${verset.id}`))
+                }}
+            >
+                <div>{book.label} {versetTitle}</div>
                 <div className={"text-5xl"}>
                     <DHeartGray className={"scale-[2]"}/>
                 </div>
