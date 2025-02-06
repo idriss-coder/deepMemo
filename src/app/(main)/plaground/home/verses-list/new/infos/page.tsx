@@ -124,7 +124,7 @@ export default function VersetInfos() {
     }
 
     return (
-        <Suspense fallback={<div>Laoding...</div>}>
+        <Suspense>
             <div className="px-[20px] flex flex-col gap-[28px]">
                 <BackButton isClose={true} link="/plaground/home/verses-list" mainTitle={versetTitle}/>
                 <AnimatePresence mode="wait">
