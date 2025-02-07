@@ -168,7 +168,7 @@ export default function VersetInfos() {
                             <h2 className="text-2xl font-bold font-['Feather']">De quoi parle {versetTitle} ?</h2>
                             <div className="flex flex-col gap-4">
                                 <Textarea
-                                    rows={3}
+                                    rows={6}
                                     value={description}
                                     onChange={e => setDescription(e.currentTarget.value)}
                                     autoFocus={true}

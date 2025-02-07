@@ -23,6 +23,7 @@ export const CloseConfirm: React.FC<{
       }) => {
 
     const isOpened = state === "opened"
+
     return (
         <TransitionScreen className={cn(
             "bg-black/80",
@@ -33,7 +34,6 @@ export const CloseConfirm: React.FC<{
                 "w-full h-fit p-5 pb-10 py-[30px] flex flex-col justify-between bg-[#141f25] rounded-t-lg overflow-hidden",
                 isOpened ? "h-fit" : "h-[0%]"
             )}>
-
                 <div className={"flex flex-col items-center gap-[20px]"}>
                     {icon}
                     <div className={"flex flex-col gap-[29px]"}>
@@ -73,7 +73,7 @@ export const CloseConfirm: React.FC<{
 export const TransitionScreen: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({children, className}) => {
     return (
         <div
-            className={cn("h-screen w-full absolute top-0 left-0 flex justify-between items-end", className)}>
+            className={cn("h-screen w-full fixed top-0 left-0 flex justify-between items-end", className)}>
             {children}
         </div>
     )

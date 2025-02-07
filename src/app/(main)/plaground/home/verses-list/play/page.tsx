@@ -13,41 +13,102 @@ import {
 } from "@/components/customize/icons";
 import {AnimatePresence, motion} from "framer-motion";
 import React, {useState} from "react";
-import {cn} from "@/lib/utils";
+import {cn, normalizeVersetTitle} from "@/lib/utils";
 import {useRouter} from "next/navigation";
 import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
+import {useGameplayArea} from "@/hooks/useGameplay";
+import {Verset} from "@/lib/db";
+import {bookMapById} from "@/backend/mock/bible-book";
+
+const MAX_HEART = 4
 
 export default function PlayPage() {
 
-    const [selectedVertset, setSelectedVertset] = React.useState<number | undefined>()
+    const [selectedVertset, setSelectedVertset] = React.useState<Verset>()
     const [requestClose, setRequestClose] = React.useState<boolean>(false);
     const [endStateOpen, setEndStateOpen] = React.useState<boolean>(false);
     const [progress, setProgress] = useState(0)
     const [isEnded, setIsEnded] = React.useState(false);
+    const [isWin, setIsWin] = React.useState(false);
+    const [wrongCount, setWrongCount] = React.useState(0)
+
+    const {
+        quizData,
+        currentQuestion,
+        currentIndex,
+        completed,
+        handleAnswer,
+        nextQuestion,
+    } = useGameplayArea();
+
+
+    React.useEffect(() => {
+        if (completed) {
+            setIsEnded(true)
+        }
+    }, [completed])
+
+    if (quizData.length === 0) {
+        return <div>Loading...</div>;
+    }
+
+    // if (completed) {
+    //     return <div>Quiz Completed! Great job!</div>;
+    // }
+
+    const onNextQuestion = () => {
+        setSelectedVertset(undefined)
+        setEndStateOpen(false)
+        nextQuestion()
+    }
+
+    const onAnswer = () => {
+
+        setEndStateOpen(true)
+        const totalQuestions = quizData.length;
+
+        if (currentQuestion.isCorrect) {
+            if (totalQuestions > 0) {
+                const result = Math.round(
+                    (((currentIndex + 1) - wrongCount) / totalQuestions) * 100
+                )
+                // const wrongResult = result * wrongCount
+                const newProgress = result;
+                setProgress(newProgress);
+            }
+            setIsWin(true)
+        } else {
+            setWrongCount(wrongCount + 1)
+            setIsWin(false)
+        }
+
+    }
 
     return (
         <div className={"px-[20px] py-[20px] flex flex-col gap-[40px] relative"}>
             <PlayProgress
                 progress={progress}
                 onCloseClick={() => setRequestClose(true)}
+                count={MAX_HEART - wrongCount}
             />
-            <PlayInfo/>
+            <PlayInfo verset={currentQuestion.target}/>
             <PlayPlayground
-                onSelectVerset={setSelectedVertset}
+                selectedVerse={selectedVertset}
+                verses={currentQuestion.outputsOptions}
+                onSelectVerset={v => {
+                    setSelectedVertset(v)
+                    handleAnswer(v)
+                }}
             />
             <PlayConfirm
                 selectedVerset={selectedVertset}
-                onConfirm={() => {
-                    setProgress(progress < 100 ? progress + 20 : 100)
-                    setEndStateOpen(true)
-                }}
+                onConfirm={onAnswer}
             />
             <EndStateScreen
-                variant={"success"}
+                variant={isWin ? "success" : "error"}
                 state={endStateOpen ? "opened" : "closed"}
                 onConfirm={() => {
-                    if (progress >= 100) setIsEnded(true)
-                    setEndStateOpen(false)
+                    onNextQuestion()
                 }}
             />
             <ClosePartyScreen
@@ -60,7 +121,15 @@ export default function PlayPage() {
     )
 }
 
-const PlayProgress: React.FC<{ onCloseClick: () => void, progress: number }> = ({onCloseClick, progress}) => {
+const PlayProgress: React.FC<{
+    onCloseClick: () => void,
+    progress: number,
+    count: number
+}> = ({
+          onCloseClick,
+          progress,
+          count
+      }) => {
 
     return (
         <div className={"flex items-center gap-[15px]"}>
@@ -69,18 +138,22 @@ const PlayProgress: React.FC<{ onCloseClick: () => void, progress: number }> = (
             }}>
                 <DCloseIcon/>
             </button>
-            <ProgressBar progress={progress}/>
-            <HeartCount/>
+            <ProgressBar
+                progress={progress}
+            />
+            <HeartCount
+                count={count}
+            />
         </div>
     )
 }
 
-const HeartCount = () => {
+const HeartCount: React.FC<{ count: number }> = ({count}) => {
 
     return (
         <div className={"flex items-center gap-[6px]"}>
             <DFlatHeart/>
-            <div className="text-[#ef5658] text-xl font-bold font-['Feather']">4</div>
+            <div className="text-[#ef5658] text-xl font-bold font-['Feather']">{count}</div>
         </div>
     )
 }
@@ -116,7 +189,7 @@ const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
     )
 }
 
-const PlayInfo = () => {
+const PlayInfo: React.FC<{ verset: Verset }> = ({verset}) => {
 
     return (
         <div className={"flex flex-col gap-[10px]"}>
@@ -124,13 +197,13 @@ const PlayInfo = () => {
             <div
                 className="text-white/80 text-base font-normal leading-[30px]"
             >
-                Celui qui marche avec les sages deviendra sage, mais celui qui fréquente les stupides aura des problème
+                {verset.content}
             </div>
         </div>
     )
 }
 
-const PlayConfirm: React.FC<{ selectedVerset: number | undefined, onConfirm: () => void }> = ({
+const PlayConfirm: React.FC<{ selectedVerset: Verset | undefined, onConfirm: () => void }> = ({
                                                                                                   selectedVerset,
                                                                                                   onConfirm
                                                                                               }) => {
@@ -155,19 +228,15 @@ const PlayConfirm: React.FC<{ selectedVerset: number | undefined, onConfirm: () 
     )
 }
 
-const verses = [
-    {id: 1, reference: "Mat. 24:14"},
-    {id: 2, reference: "John 3:16"},
-    {id: 3, reference: "Rom. 8:28"},
-    {id: 4, reference: "Phil. 4:13"},
-]
 
-const PlayPlayground: React.FC<{ onSelectVerset: (v: number) => void }> = ({onSelectVerset}) => {
-    const [selectedVerse, setSelectedVerse] = useState<number | null>(null)
+const PlayPlayground: React.FC<{ onSelectVerset: (v: Verset) => void, verses: Verset[], selectedVerse?: Verset }> = ({
+                                                                                                                         onSelectVerset,
+                                                                                                                         verses,
+                                                                                                                         selectedVerse
+                                                                                                                     }) => {
 
-    const handleClick = (id: number) => {
-        setSelectedVerse(id === selectedVerse ? null : id)
-        onSelectVerset(id)
+    const handleClick = (verset: Verset) => {
+        onSelectVerset(verset)
     }
 
     return (
@@ -183,21 +252,21 @@ const PlayPlayground: React.FC<{ onSelectVerset: (v: number) => void }> = ({onSe
                     >
                         <Button
                             size="default"
-                            variant={selectedVerse === verse.id ? "selected" : "neutral"}
+                            variant={selectedVerse?.id === verse.id ? "selected" : "neutral"}
                             className={cn(
                                 "w-full flex justify-between items-center",
-                                selectedVerse !== verse.id ? "border-[#38454e]" : ""
+                                selectedVerse?.id !== verse.id ? "border-[#38454e]" : ""
                             )}
-                            onClick={() => handleClick(verse.id)}
+                            onClick={() => handleClick(verse)}
                         >
-                            <span>{verse.reference}</span>
+                            <span>{bookMapById.get(verse.book_num)?.label} {normalizeVersetTitle(verse)}</span>
                             <motion.div
                                 className="text-5xl"
                                 initial={{scale: 2}}
-                                animate={{scale: selectedVerse === verse.id ? [2, 2.2, 2] : 2}}
+                                animate={{scale: selectedVerse?.id === verse.id ? [2, 2.2, 2] : 2}}
                                 transition={{duration: 0.3}}
                             >
-                                {selectedVerse === verse.id
+                                {selectedVerse?.id === verse.id
                                     ? <DHeartRedIcon/>
                                     : <DHeartGray/>
                                 }

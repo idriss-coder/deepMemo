@@ -9,6 +9,7 @@ import React, {useMemo} from "react";
 import {Verset} from "@/lib/db";
 import {Book, bookMapById} from "@/backend/mock/bible-book";
 import {useVerses} from "@/hooks/useVerses";
+import {normalizeVersetTitle} from "@/lib/utils";
 
 export default function VersetListPage() {
     const {myVerses} = useVerses()
@@ -121,11 +122,7 @@ const EmptyVerses = () => {
 
 const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 
-    const versetTitle = useMemo(() => {
-        return `${verset.chapter_num ? verset.chapter_num + "" : ""} ${
-            verset.verses_num ? ": " + verset.verses_num[0] + (verset.verses_num.length > 1 ? "-" + verset.verses_num[verset.verses_num.length - 1] : "") : ""
-        } `
-    }, [verset])
+    const versetTitle = useMemo(() => normalizeVersetTitle(verset), [verset])
 
     const $router = useRouter()
 
