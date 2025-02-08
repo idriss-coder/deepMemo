@@ -116,7 +116,7 @@ const EmptyVerses: React.FC<{ verses: Verset[] }> = ({verses}) => {
                 {verses.length == 0 ? ` Tu n’a
                 pas encore des versets pour t’entrainer. Clique ici pour ajouter tes versets favorites pour
                 l’entrainement.` : <span>
-                    Ajoute encore {5 - verses.length} pour débuter la partie
+                    Ajoute encore minimum {5 - verses.length} versets favoris pour débuter la partie
                 </span>}
             </div>
         </div>
