@@ -20,9 +20,14 @@ import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
 import {bookMapById} from "@/backend/mock/bible-book";
 import {Heart, LoaderIcon} from "lucide-react";
-import Lottie from "lottie-react";
+import dynamic from 'next/dynamic'
 import flashLotie from "@/effect/flash.json"
 import starLotie from "@/effect/star.json"
+
+const Lottie = dynamic(
+    () => import('lottie-react'),
+    {ssr: false}
+)
 
 const MAX_HEART = 4
 
