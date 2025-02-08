@@ -20,6 +20,9 @@ import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
 import {bookMapById} from "@/backend/mock/bible-book";
 import {Heart, LoaderIcon} from "lucide-react";
+import Lottie from "lottie-react";
+import flashLotie from "@/effect/flash.json"
+import starLotie from "@/effect/star.json"
 
 const MAX_HEART = 4
 
@@ -34,6 +37,8 @@ export default function PlayPage() {
     const [wrongCount, setWrongCount] = React.useState(0)
     const [hasInteracted, setHasInteracted] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
+    const [inFlash, setInFlash] = React.useState(false);
+    const [inStar, setInStar] = React.useState(false);
 
     const {
         quizData,
@@ -80,6 +85,28 @@ export default function PlayPage() {
         }
     }, [completed])
 
+    React.useEffect(() => {
+        if (progress >= 10 && progress < 60) {
+            setInFlash(true)
+            playSound({path: SoundList.flash, sound: 0.4})
+
+            const timer = setTimeout(() => {
+                setInFlash(false)
+                clearTimeout(timer)
+            }, 2000)
+        }
+
+        if (progress >= 70 && progress < 80) {
+            setInStar(true)
+            playSound({path: SoundList.thunder, sound: 0.2})
+
+            const timer = setTimeout(() => {
+                setInStar(false)
+                clearTimeout(timer)
+            }, 1600)
+        }
+    }, [progress])
+
     if (quizData.length === 0) {
         return <div>Loading...</div>;
     }
@@ -102,7 +129,7 @@ export default function PlayPage() {
         if (currentQuestion && currentQuestion.isCorrect) {
             if (totalQuestions > 0) {
                 const result = Math.round(
-                    (((currentIndex + 1) - wrongCount) / totalQuestions) * 100
+                    (((currentIndex + 1)) / totalQuestions) * 100
                 )
                 // const wrongResult = result * wrongCount
                 const newProgress = result;
@@ -126,6 +153,26 @@ export default function PlayPage() {
                     onCloseClick={() => setRequestClose(true)}
                     count={lives}
                 />
+
+                <div className={cn(
+                    "h-screen top-0 absolute",
+                    (inFlash || inStar) && "w-full"
+                )}>
+
+                    {inFlash && <Lottie
+                        animationData={flashLotie}
+                        loop={true}
+                        autoplay={true}
+                    />}
+                    {inStar && <Lottie
+                        animationData={starLotie}
+                        loop={true}
+                        autoplay={true}
+                        width={300}
+                        height={300}
+                    />}
+                </div>
+
                 <PlayInfo
                     isOldError={currentQuestion.missedCount > 0 && !selectedVertset}
                     verset={currentQuestion.target}
@@ -254,7 +301,7 @@ const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
                 <motion.div
                     className={cn(
                         "absolute top-0 left-0 h-full bg-gradient-to-r ",
-                        progress > 50 ? "from-[#ffd900] to-[#ffd900]/85" : "from-lime-400 to-lime-500"
+                        progress >= 50 ? "from-[#ffd900] to-[#ffd900]/85" : "from-lime-400 to-lime-500"
                     )}
                     initial={{width: 0}}
                     animate={{width: `${progress}%`}}

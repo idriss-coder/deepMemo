@@ -14,6 +14,10 @@ export enum SoundList {
 
   theme1 = "/assets/sound/theme/theme1.mp3",
   theme2 = "/assets/sound/theme/theme2.mp3",
+
+
+  thunder = "/assets/sound/lottie/thunder.mp3",
+  flash = "/assets/sound/lottie/flash.mp3",
 }
 
 export function cn(...inputs: ClassValue[]) {
