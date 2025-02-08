@@ -6,7 +6,7 @@ import Link from "next/link";
 import React from "react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
-import {Slider} from "@/components/ui/slider";
+import {SoundThemRegulator} from "@/app/(main)/plaground/home/_components/sound";
 
 export default function HomPage() {
 
@@ -52,7 +52,6 @@ const TrainingUser = () => {
 
     const [settingsOpen, setSettingsOpen] = React.useState(false)
     const $router = useRouter()
-    const sound = localStorage.getItem("soundTheme")
 
     return (
         <div
@@ -82,13 +81,7 @@ const TrainingUser = () => {
                                 Musique
                             </label>
                             <div className={"flex-1"}>
-                                <Slider
-                                    defaultValue={[sound ? +(sound) : 0.2]}
-                                    max={1} step={0.1}
-                                    onValueChange={(v) => {
-                                        localStorage.setItem("soundTheme", JSON.stringify(v[0]))
-                                    }}
-                                />
+                                <SoundThemRegulator/>
                             </div>
                         </div>
                         <Button
