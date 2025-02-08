@@ -144,7 +144,7 @@ export function stopAllSounds() {
 
 export const playSound = ({path, replay = false, sound = 0.2}: { path: string, replay?: boolean, sound?: number }) => {
 
-  if (sound ! > 0) return
+  if (sound < 0.1) return
 
   const audio = new Audio(path);
   audio.volume = sound
