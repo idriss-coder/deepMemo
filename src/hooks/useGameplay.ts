@@ -1,24 +1,19 @@
 // useGameplayArea.ts
-import { useState, useEffect, useCallback } from "react";
-import { useVerses } from "@/hooks/useVerses";
+import {useCallback, useEffect, useState} from "react";
 import {Verset} from "@/lib/db";
+import {useVerses} from './useVerses'; // Hook d’exemple fourni
 
-/**
- * Each quiz item in the game:
- * - `target`: the correct verse
- * - `outputsOptions`: the 4 possible answers
- * - `userAnswer`: the user’s pick
- * - `isCorrect`: whether the user’s pick was correct
- */
 export interface QuizItem {
-    id: number;               // question index (0-based or otherwise)
-    target: Verset;            // the "correct" verse for this question
-    outputsOptions: Verset[];  // set of 4 possible answers
-    userAnswer: Verset | null; // what the user selected
-    isCorrect: boolean;       // was their answer correct?
+    id: number;               // question index (0-based)
+    target: Verset;           // la "bonne" réponse
+    outputsOptions: Verset[]; // 4 choix possibles
+    userAnswer: Verset | null;
+    isCorrect: boolean;
+    isOldError: boolean;
+    missedCount: number;      // nombre de fois où cette question a déjà été ratée
 }
 
-/** A utility function to shuffle an array in-place (Fisher–Yates). */
+/** Shuffle standard de Fisher–Yates */
 function shuffle<T>(array: T[]): T[] {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -28,36 +23,53 @@ function shuffle<T>(array: T[]): T[] {
     return arr;
 }
 
-/**
- * Given a correct verse and the full list of verses,
- * returns 4 options: (the correct verse + 3 random distinct incorrect ones).
- */
+/** Renvoie 4 options aléatoires (dont la bonne réponse) */
 function getRandomOptions(correct: Verset, allVerses: Verset[]): Verset[] {
     const others = allVerses.filter((v) => v.id !== correct.id);
-    // Randomly pick 3 incorrect
     const randomIncorrect = shuffle(others).slice(0, 3);
-    // Combine correct with 3 incorrect, then shuffle
     return shuffle([correct, ...randomIncorrect]);
 }
 
-export function useGameplayArea() {
-    const { myVerses } = useVerses(); // from your existing hook
+// interface GameplayReturn {
+//     quizData: QuizItem[];
+//     currentIndex: number;
+//     currentQuestion: QuizItem | undefined;
+//     completed: boolean;
+//     score: number;
+//     lives: number;
+//     maxLives: number;
+//     handleAnswer: (selectedOption: Verset) => void;
+//     nextQuestion: () => void;
+//     resetQuiz: () => void;
+//     replayMistakes: () => void;
+// }
 
+export function useGameplayArea() {
+    const {myVerses} = useVerses(); // exemples de versets
     const [quizData, setQuizData] = useState<QuizItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [completed, setCompleted] = useState<boolean>(false);
+
+    // Ajout de mécaniques supplémentaires
+    const [score, setScore] = useState<number>(0);
+    const [lives, setLives] = useState<number>(3);
+    const maxLives = 3;
+
+    /**
+     * State facultatif pour conserver les questions ratées
+     * (On pourrait s’en passer si on injecte directement dans quizData,
+     *  mais c’est parfois plus clair de le gérer à part).
+     */
     const [wrongAnswers, setWrongAnswers] = useState<QuizItem[]>([]);
 
     /**
-     * Build initial quiz data when `myVerses` changes.
-     * Adjust the slicing (or random selection) logic as you like.
+     * (Re)construction du quiz de base
      */
     useEffect(() => {
         if (!myVerses || myVerses.length === 0) return;
 
-        // Example: limit to first 10 verses (or shuffle them before slicing, etc.)
+        // ex: on prend 10 versets max (ou tout le tableau, ou un shuffle, etc.)
         const selected = myVerses.slice(0, 10);
-
         const newQuiz = selected.map((verse, index) => {
             const options = getRandomOptions(verse, selected);
             return {
@@ -66,27 +78,42 @@ export function useGameplayArea() {
                 outputsOptions: options,
                 userAnswer: null,
                 isCorrect: false,
+                isOldError: false,
+                missedCount: 0,
             };
-        })
+        });
 
         setQuizData(newQuiz);
         setCurrentIndex(0);
-        setCompleted(false)
-        setWrongAnswers([])
-    }, [myVerses])
+        setCompleted(false);
+        setWrongAnswers([]);
+        setScore(0);
+        setLives(maxLives);
+    }, [myVerses]);
 
     /**
-     * Handle the user selecting an answer.
-     * We mark the question's userAnswer and whether it's correct.
+     * Gère la sélection d’une réponse par l’utilisateur
      */
     const handleAnswer = useCallback(
         (selectedOption: Verset) => {
             setQuizData((prev) => {
                 const updated = [...prev];
                 const current = updated[currentIndex];
+
                 if (current) {
                     current.userAnswer = selectedOption;
-                    current.isCorrect = selectedOption.id === current.target.id;
+                    current.isCorrect = (selectedOption.id === current.target.id);
+                    current.isOldError = !current.isCorrect;
+
+                    if (current.isCorrect) {
+                        // Incrémente le score
+                        setScore((old) => old + 1);
+                    } else {
+                        // Retire une vie
+                        //setLives((old) => Math.max(old - 1, 0));
+                        // Incrémente le nombre d’erreurs sur cette question
+                        current.missedCount += 1;
+                    }
                 }
                 return updated;
             });
@@ -94,27 +121,46 @@ export function useGameplayArea() {
         [currentIndex]
     );
 
+
     /**
-     * Proceed to the next question. If at the end, optionally re-inject missed questions.
+     * Passe à la question suivante.
+     * - Si on est à la fin et qu’il reste des questions ratées, on les ré-injecte.
+     * - Sinon, on passe à la question suivante.
+     * - Si plus de vies, on arrête la partie.
      */
     const nextQuestion = useCallback(() => {
         setQuizData((prev) => {
             const current = prev[currentIndex];
+
+            // Si la question courante n’est pas correcte, on l’ajoute à wrongAnswers
             if (current && !current.isCorrect) {
-                setWrongAnswers((old) => [...old, current]);
+                setWrongAnswers((old) => {
+                    // on peut vérifier qu’elle n’est pas déjà dedans
+                    if (!old.find((q) => q.id === current.id)) {
+                        return [...old, {...current}];
+                    }
+                    return old;
+                });
             }
+
             return prev;
         });
 
-        // Move to the next question, or handle completion
+        // Si plus de vies, fin immédiate
+        if (lives <= 0) {
+            setCompleted(true);
+            return;
+        }
+
+        // Cas normal: il reste des questions
         if (currentIndex < quizData.length - 1) {
-            setCurrentIndex((prev) => prev + 1);
+            setCurrentIndex((i) => i + 1);
         } else {
-            // If we have missed questions, re-queue them
+            // Fin du premier passage : on regarde s’il y a des erreurs à repasser
             if (wrongAnswers.length > 0) {
                 setQuizData((prev) => {
                     const extraQuestions = wrongAnswers.map((q, idx) => {
-                        // Optionally re-generate random options or reuse old ones
+                        // On peut recréer de nouvelles options si on veut
                         const options = getRandomOptions(q.target, myVerses || []);
                         return {
                             ...q,
@@ -122,34 +168,67 @@ export function useGameplayArea() {
                             outputsOptions: options,
                             userAnswer: null,
                             isCorrect: false,
+                            isOldError: false,
                         };
                     });
 
                     return [...prev, ...extraQuestions];
                 });
-                // Clear the `wrongAnswers` now that they've been re-injected
+
+                // On passe à la première question nouvellement ajoutée
+                setCurrentIndex(quizData.length);
+                // On vide le tableau des erreurs car elles sont réinjectées
                 setWrongAnswers([]);
-                // Move to the next question (the first re-queued one)
-                setCurrentIndex((i) => i + 1);
             } else {
+                // Plus de questions et plus d’erreurs
                 setCompleted(true);
             }
         }
-    }, [currentIndex, quizData, wrongAnswers, myVerses]);
+    }, [currentIndex, quizData, wrongAnswers, lives, myVerses]);
 
     /**
-     * Reset the quiz if needed.
-     * You can also rely on the initial useEffect logic if `myVerses` changes.
+     * Permet de relancer UNIQUEMENT les questions ratées, par exemple via un bouton
+     * « Revoir mes erreurs ». On peut choisir d’autres stratégies (tout relancer, etc.).
+     */
+    const replayMistakes = useCallback(() => {
+        if (wrongAnswers.length === 0) return;
+
+        const mistakesQuiz = wrongAnswers.map((q, idx) => {
+            const options = getRandomOptions(q.target, myVerses || []);
+            return {
+                ...q,
+                id: idx, // reset d’index
+                outputsOptions: options,
+                userAnswer: null,
+                isCorrect: false,
+                isOldError: false,
+            };
+        });
+
+        setQuizData(mistakesQuiz);
+        setCurrentIndex(0);
+        setCompleted(false);
+        setWrongAnswers([]);
+        // Optionnel : on peut remettre les vies à max, ou en conserver l’état
+        // setLives(maxLives);
+    }, [wrongAnswers, myVerses]);
+
+    /**
+     * Réinitialise complètement la session
      */
     const resetQuiz = useCallback(() => {
         setCurrentIndex(0);
         setCompleted(false);
         setWrongAnswers([]);
-        // The existing useEffect logic will re-run if you want to rebuild quizData from scratch.
-        // Otherwise, you can forcibly re-generate quizData here if you want a fresh shuffle.
+        setScore(0);
+        setLives(maxLives);
+
+        // On relance l’effet useEffect qui va recréer le quiz
+        // Une astuce consiste à faire varier artificiellement un « key »
+        // ou un state dépendant, ou simplement recharger myVerses si besoin.
     }, []);
 
-    // The current question object
+    // Question courante
     const currentQuestion = quizData[currentIndex];
 
     return {
@@ -157,8 +236,13 @@ export function useGameplayArea() {
         currentIndex,
         currentQuestion,
         completed,
+        score,
+        lives,
+        setLives,
+        maxLives,
         handleAnswer,
         nextQuestion,
         resetQuiz,
+        replayMistakes,
     };
 }

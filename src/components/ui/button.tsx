@@ -2,7 +2,7 @@ import * as React from "react"
 import {Slot} from "@radix-ui/react-slot"
 import {cva, type VariantProps} from "class-variance-authority"
 
-import {cn} from "@/lib/utils"
+import {cn, playSound} from "@/lib/utils"
 
 const buttonVariants = cva(
     "inline-flex select-none items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-lPrimary/20 font-['Feather'] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lPrimary/20 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -56,16 +56,36 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
+    asChild?: boolean,
+    withSound?: boolean,
+    soundMode?: number
 }
 
+/*
+* On clique sur ce bouton je souhaite jouer le song dans '/sound/bouton_click.mp3', si parametre with sound est à true et qui est par defaut à true
+* */
+
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+    ({className, variant, size, withSound = false, soundMode, onClick, asChild = false, ...props}, ref) => {
     const Comp = asChild ? Slot : "button"
+
+        // Handler local qui déclenche le son + le onClick existant
+        const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+            if (withSound) {
+                playSound({path: soundMode == 2 ? "/assets/sound/bouton_click.mp3" : "/assets/sound/bouton_click_2.mp3"})
+            }
+
+            // Appelle le onClick du parent si fourni
+            if (typeof onClick === "function") {
+                onClick(event);
+            }
+        };
+
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
         ref={ref}
+        onClick={handleClick}
         {...props}
       />
     )

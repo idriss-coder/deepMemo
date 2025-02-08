@@ -1,24 +1,25 @@
 "use client"
 
 import {Button} from "@/components/ui/button";
-import {
-    DBook,
-    DCloseIcon,
-    DFlagIcon,
-    DFlatHeart,
-    DHeartGray,
-    DHeartRedIcon,
-    DMisteryBoxIcon,
-    DXPIcon
-} from "@/components/customize/icons";
+import {DCloseIcon, DFlagIcon, DHeartGray, DHeartRedIcon, DMisteryBoxIcon, DXPIcon} from "@/components/customize/icons";
 import {AnimatePresence, motion} from "framer-motion";
-import React, {useState} from "react";
-import {cn, normalizeVersetTitle} from "@/lib/utils";
+import React, {useEffect, useState} from "react";
+import {
+    cn,
+    getRandomEncouragement,
+    getRandomErrorMessage,
+    normalizeVersetTitle,
+    pickRandom,
+    playSound,
+    SoundList,
+    stopAllSounds
+} from "@/lib/utils";
 import {useRouter} from "next/navigation";
 import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
 import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
 import {bookMapById} from "@/backend/mock/bible-book";
+import {Heart, LoaderIcon} from "lucide-react";
 
 const MAX_HEART = 4
 
@@ -31,6 +32,8 @@ export default function PlayPage() {
     const [isEnded, setIsEnded] = React.useState(false);
     const [isWin, setIsWin] = React.useState(false);
     const [wrongCount, setWrongCount] = React.useState(0)
+    const [hasInteracted, setHasInteracted] = useState(false);
+    const [hasStarted, setHasStarted] = useState(false);
 
     const {
         quizData,
@@ -39,11 +42,40 @@ export default function PlayPage() {
         completed,
         handleAnswer,
         nextQuestion,
+        lives,
+        setLives,
+        score,
+
     } = useGameplayArea();
+
+    useEffect(() => {
+        function handleUserInteraction() {
+            setHasInteracted(true);
+            // On peut détacher l'event listener ici si on veut
+        }
+
+        window.addEventListener('click', handleUserInteraction, {once: true});
+        return () => {
+            window.removeEventListener('click', handleUserInteraction);
+        };
+    }, []);
+
+
+    React.useEffect(() => {
+        if (quizData.length && hasInteracted && !hasStarted) {
+            playSound({path: SoundList.gameStarted})
+            const out = setTimeout(() => {
+                playSound({path: pickRandom([SoundList.theme2, SoundList.theme1]), replay: true, sound: 0.1})
+                clearTimeout(out)
+            }, 1000)
+            setHasStarted(true)
+        }
+    }, [hasInteracted, quizData, hasStarted])
 
 
     React.useEffect(() => {
         if (completed) {
+            playSound({path: SoundList.gameEnded})
             setIsEnded(true)
         }
     }, [completed])
@@ -67,7 +99,7 @@ export default function PlayPage() {
         setEndStateOpen(true)
         const totalQuestions = quizData.length;
 
-        if (currentQuestion.isCorrect) {
+        if (currentQuestion && currentQuestion.isCorrect) {
             if (totalQuestions > 0) {
                 const result = Math.round(
                     (((currentIndex + 1) - wrongCount) / totalQuestions) * 100
@@ -76,49 +108,65 @@ export default function PlayPage() {
                 const newProgress = result;
                 setProgress(newProgress);
             }
+            playSound({path: pickRandom([SoundList.sellectWin1, SoundList.sellectWin2, SoundList.sellectWin3])})
             setIsWin(true)
         } else {
             setWrongCount(wrongCount + 1)
+            setLives(lives - 1)
             setIsWin(false)
+            playSound({path: SoundList.gameLoosed})
         }
-
     }
 
-    return (
-        <div className={"px-[20px] py-[20px] flex flex-col gap-[40px] relative"}>
-            <PlayProgress
-                progress={progress}
-                onCloseClick={() => setRequestClose(true)}
-                count={MAX_HEART - wrongCount}
-            />
-            <PlayInfo verset={currentQuestion.target}/>
-            <PlayPlayground
-                selectedVerse={selectedVertset}
-                verses={currentQuestion.outputsOptions}
-                onSelectVerset={v => {
-                    setSelectedVertset(v)
-                    handleAnswer(v)
-                }}
-            />
-            <PlayConfirm
-                selectedVerset={selectedVertset}
-                onConfirm={onAnswer}
-            />
-            <EndStateScreen
-                variant={isWin ? "success" : "error"}
-                state={endStateOpen ? "opened" : "closed"}
-                onConfirm={() => {
-                    onNextQuestion()
-                }}
-            />
-            <ClosePartyScreen
-                state={requestClose ? "opened" : "closed"}
-                onCloseCancel={() => setRequestClose(false)}
-            />
+    if (currentQuestion) {
+        return (
+            <div className={"px-[20px] py-[20px] flex flex-col gap-[40px] relative"}>
+                <PlayProgress
+                    progress={progress}
+                    onCloseClick={() => setRequestClose(true)}
+                    count={lives}
+                />
+                <PlayInfo
+                    isOldError={currentQuestion.missedCount > 0 && !selectedVertset}
+                    verset={currentQuestion.target}
+                />
+                <PlayPlayground
+                    selectedVerse={selectedVertset}
+                    verses={currentQuestion.outputsOptions}
+                    onSelectVerset={v => {
+                        setSelectedVertset(v)
+                        handleAnswer(v)
+                    }}
+                />
+                <PlayConfirm
+                    selectedVerset={selectedVertset}
+                    onConfirm={() => {
+                        if (selectedVertset) {
+                            console.log("On press")
+                            onAnswer()
+                        }
+                    }}
+                />
+                <EndStateScreen
+                    variant={isWin ? "success" : "error"}
+                    state={endStateOpen ? "opened" : "closed"}
+                    onConfirm={() => {
+                        onNextQuestion()
+                    }}
+                />
+                <ClosePartyScreen
+                    state={requestClose ? "opened" : "closed"}
+                    onCloseCancel={() => setRequestClose(false)}
+                />
 
-            {isEnded && <EndPartyScreen/>}
-        </div>
-    )
+                {isEnded && (
+                    <EndPartyScreen
+                        score={10 - wrongCount}
+                    />
+                )}
+            </div>
+        )
+    }
 }
 
 const PlayProgress: React.FC<{
@@ -148,15 +196,53 @@ const PlayProgress: React.FC<{
     )
 }
 
-const HeartCount: React.FC<{ count: number }> = ({count}) => {
+interface HeartCountProps {
+    count: number
+}
+
+const HeartCount: React.FC<HeartCountProps> = ({count}) => {
+    const [showAllHearts, setShowAllHearts] = useState(true)
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShowAllHearts(false)
+        }, 1000) // Show all hearts for 2 seconds before animating
+
+        return () => clearTimeout(timer)
+    }, [])
 
     return (
-        <div className={"flex items-center gap-[6px]"}>
-            <DFlatHeart/>
-            <div className="text-[#ef5658] text-xl font-bold font-['Feather']">{count}</div>
+        <div className="flex items-center gap-2">
+            <AnimatePresence>
+                {showAllHearts ? (
+                    Array.from({length: count}).map((_, index) => (
+                        <motion.div
+                            key={index}
+                            initial={{opacity: 1, scale: 1}}
+                            exit={{
+                                opacity: 0,
+                                scale: 0,
+                                transition: {duration: 0.5, delay: index * 0.1},
+                            }}
+                        >
+                            <Heart className="w-6 h-6 text-red-500 fill-red-500"/>
+                        </motion.div>
+                    ))
+                ) : (
+                    <motion.div
+                        initial={{scale: 0}}
+                        animate={{scale: 1}}
+                        transition={{type: "spring", stiffness: 260, damping: 20}}
+                    >
+                        <Heart className="w-6 h-6 text-red-500 fill-red-500"/>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+            <div className="text-red-500 text-xl font-bold font-['Feather']">{count}</div>
         </div>
     )
 }
+
 
 const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
 
@@ -189,11 +275,19 @@ const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
     )
 }
 
-const PlayInfo: React.FC<{ verset: Verset }> = ({verset}) => {
+const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean }> = ({verset, isOldError}) => {
 
     return (
         <div className={"flex flex-col gap-[10px]"}>
-            <div className="text-white text-xl font-bold font-['Feather']">Séléctionne le bon verset</div>
+            {isOldError && (
+                <div className="text-[#ffd900] text-[22px] font-bold font-['Feather'] flex items-center gap-2">
+                    <LoaderIcon/>
+                    <div>Ancienne erreur !</div>
+                </div>
+            )}
+            <div className="text-white text-xl font-bold font-['Feather']">
+                Séléctionne le bon verset
+            </div>
             <div
                 className="text-white/80 text-base font-normal leading-[30px]"
             >
@@ -243,14 +337,16 @@ const PlayPlayground: React.FC<{ onSelectVerset: (v: Verset) => void, verses: Ve
         <div className="flex flex-col gap-4">
             <AnimatePresence>
                 {verses.map((verse) => (
-                    <motion.div
+                    <div
                         key={verse.id}
-                        initial={{opacity: 1}}
-                        exit={{opacity: 0}}
-                        animate={{opacity: 1}}
-                        transition={{duration: 0.3}}
+                        // initial={{opacity: 1}}
+                        // exit={{opacity: 0}}
+                        // animate={{opacity: 1}}
+                        // transition={{duration: 0.3}}
                     >
                         <Button
+                            withSound={true}
+                            soundMode={2}
                             size="default"
                             variant={selectedVerse?.id === verse.id ? "selected" : "neutral"}
                             className={cn(
@@ -272,7 +368,7 @@ const PlayPlayground: React.FC<{ onSelectVerset: (v: Verset) => void, verses: Ve
                                 }
                             </motion.div>
                         </Button>
-                    </motion.div>
+                    </div>
                 ))}
             </AnimatePresence>
         </div>
@@ -301,7 +397,7 @@ const EndStateScreen: React.FC<{
                             isError && "text-[#CE5D55]"
                         )}
                         >
-                            {isError ? "Mauvais choix" : "Bonne reponse"}
+                            {isError ? getRandomErrorMessage() : getRandomEncouragement()}
                         </div>
                     </div>
                     <Button
@@ -338,13 +434,14 @@ const ClosePartyScreen: React.FC<{ state: "closed" | "opened", onCloseCancel: ()
             cancelText={"Continuer"}
             performText={"Terminer la session"}
             performAction={() => {
+                stopAllSounds();
                 $router.push("/plaground/home/verses-list")
             }}
         />
     )
 }
 
-const EndPartyScreen: React.FC = () => {
+const EndPartyScreen: React.FC<{ score: number }> = ({score}) => {
 
     const $router = useRouter()
 
@@ -354,27 +451,38 @@ const EndPartyScreen: React.FC = () => {
             <div>
             </div>
             <div className={"flex flex-col gap-[30px] items-center"}>
-                <DMisteryBoxIcon/>
-                <div className="text-[#ffd900] text-[22px] font-bold font-['Feather']">Entraînement terminé !</div>
+                {score <= 7 ? <div className={"text-[64px] text-center flex items-center justify-center"}>
+                        😓
+                    </div> :
+                    <DMisteryBoxIcon width={50} height={50} className={"scale-150"}/>
+                }
+                <div>
+                    <div className="text-[#ffd900] text-[22px] font-bold font-['Feather'] text-center">Entraînement
+                        terminé !
+                    </div>
+                    {score <= 7 && <div className="text-[16px] text-center">
+                        Ne t’en fais pas, tu feras mieux la prochaine fois !
+                    </div>}
+                </div>
                 <div className={"flex gap-3 w-full"}>
 
-                    <div className={"flex-1"}>
-                        <StatItem
-                            icon={
-                                <DBook width={25} height={25}/>
-                            }
-                            title={"29895"}
-                            desc={"XP gagnés"}
-                        />
-                    </div>
+                    {/*<div className={"flex-1"}>*/}
+                    {/*    <StatItem*/}
+                    {/*        icon={*/}
+                    {/*            <DBook width={25} height={25}/>*/}
+                    {/*        }*/}
+                    {/*        title={"29895"}*/}
+                    {/*        desc={"XP gagnés"}*/}
+                    {/*    />*/}
+                    {/*</div>*/}
 
                     <div className={"flex-1"}>
                         <StatItem
                             icon={
                                 <DXPIcon width={25} height={25}/>
                             }
-                            title={"0.7"}
-                            desc={"Taux de réussite"}
+                            title={`${score}`}
+                            desc={"Score"}
                         />
                     </div>
 
@@ -385,6 +493,7 @@ const EndPartyScreen: React.FC = () => {
                     variant={"default"}
                     className="w-full"
                     onClick={() => {
+                        stopAllSounds();
                         $router.push("/plaground/home/verses-list")
                     }}
                 >

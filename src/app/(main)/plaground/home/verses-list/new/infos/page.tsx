@@ -257,7 +257,7 @@ const ListGrid: React.FC<ListGridProps> = ({listTitle, listCount, max = 1, onSel
     return (
         <div className="flex flex-col gap-6">
             <h2 className="text-2xl font-bold font-['Feather']">{listTitle}</h2>
-            <div className="grid grid-cols-5 gap-[10px]">
+            <div className="grid grid-cols-5 gap-[10px] pb-32">
                 {[...Array(listCount)].map((_, i) => {
                     const number = i + 1
                     const isActive = actives.includes(number)
