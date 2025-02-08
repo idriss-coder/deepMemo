@@ -20,7 +20,7 @@ export default function VersetListPage() {
             <div className={"px-[20px] mt-[20px] flex flex-col gap-3"}>
                 <NavSection versetCount={myVerses.length}/>
                 <NewVerset/>
-                {myVerses.length == 0 && <EmptyVerses/>}
+                {myVerses.length < 5 && <EmptyVerses verses={myVerses}/>}
                 <VersetListView verses={myVerses}/>
             </div>
         </div>
@@ -60,8 +60,8 @@ const HeroSection: React.FC<{ verses: Verset[] }> = ({verses}) => {
                 </div>
 
                 <Button
-                    variant={verses.length ? "purple" : "disabled"}
-                    disabled={!verses.length}
+                    variant={verses.length >= 5 ? "purple" : "disabled"}
+                    disabled={!(verses.length >= 5)}
                     className={"w-full"}
                     onClick={() => {
                         $router.push("/plaground/home/verses-list/play");
@@ -107,14 +107,17 @@ const NewVerset = () => {
     )
 }
 
-const EmptyVerses = () => {
+const EmptyVerses: React.FC<{ verses: Verset[] }> = ({verses}) => {
 
     return (
         <div className={"flex flex-col items-center gap-[11.5px]"}>
             <DArrowTop/>
-            <div className="w-[341px] text-center text-[#4e5b64] text-sm font-normal leading-snug">Tu n’a
+            <div className="w-[341px] text-center text-[#4e5b64] text-sm font-normal leading-snug">
+                {verses.length == 0 ? ` Tu n’a
                 pas encore des versets pour t’entrainer. Clique ici pour ajouter tes versets favorites pour
-                l’entrainement.
+                l’entrainement.` : <span>
+                    Ajoute encore {5 - verses.length} pour débuter la partie
+                </span>}
             </div>
         </div>
     )
