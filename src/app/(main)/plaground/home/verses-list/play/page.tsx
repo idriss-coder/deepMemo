@@ -75,7 +75,12 @@ export default function PlayPage() {
         if (quizData.length && hasInteracted && !hasStarted) {
             playSound({path: SoundList.gameStarted})
             const out = setTimeout(() => {
-                playSound({path: pickRandom([SoundList.theme2, SoundList.theme1]), replay: true, sound: 0.1})
+                const soundThemeVolume = localStorage.getItem("soundTheme")
+                playSound({
+                    path: pickRandom([SoundList.theme2, SoundList.theme1]),
+                    replay: true,
+                    sound: soundThemeVolume ? +soundThemeVolume : 0.1
+                })
                 clearTimeout(out)
             }, 1000)
             setHasStarted(true)

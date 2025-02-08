@@ -6,6 +6,7 @@ import Link from "next/link";
 import React from "react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
+import {Slider} from "@/components/ui/slider";
 
 export default function HomPage() {
 
@@ -66,19 +67,38 @@ const TrainingUser = () => {
             <div className={"flex flex-col items-center justify-center gap-8"}>
                 <UerAvatarWrap variant={settingsOpen ? "sm" : "default"}/>
                 {settingsOpen && <>
-                    <div className={"justify-start items-center gap-[26px] inline-flex"}>
-                        <div className="text-white/90 text-base font-bold font-['Feather']">Idriss duval</div>
-                        <div className="w-px h-[42px] relative bg-white/10"/>
-                        <div className="text-white/90 text-base font-bold font-['Feather']">237657946392</div>
+                    <div className={"flex flex-col items-center justify-center gap-8"}>
+                        <div className={"justify-start items-center gap-[26px] inline-flex"}>
+                            <div className="text-white/90 text-base font-bold font-['Feather']">John Doe</div>
+                            <div className="w-px h-[42px] relative bg-white/10"/>
+                            <div className="text-white/90 text-base font-bold font-['Feather']">+2376********</div>
+                        </div>
+                        <div className="flex items-center space-x-4 w-full">
+                            <label
+                                htmlFor="sound-theme"
+                                className="text-white/90 text-base font-bold font-['Feather']"
+                            >
+                                Musique
+                            </label>
+                            <div className={"flex-1"}>
+                                <Slider
+                                    defaultValue={[localStorage.getItem("soundTheme") ? +(localStorage.getItem("soundTheme")) : 0.2]}
+                                    max={1} step={0.1}
+                                    onValueChange={(v) => {
+                                        localStorage.setItem("soundTheme", JSON.stringify(v[0]))
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <Button
+                            variant={"textRed"}
+                            onClick={() => {
+                                $router.push("/auth/login")
+                            }}
+                        >
+                            Déconnexion
+                        </Button>
                     </div>
-                    <Button
-                        variant={"textRed"}
-                        onClick={() => {
-                            $router.push("/auth/login")
-                        }}
-                    >
-                        Déconnexion
-                    </Button>
                 </>}
             </div>
         </div>
@@ -98,7 +118,7 @@ const UerAvatarWrap: React.FC<{ variant?: "default" | "sm" }> = ({variant}) => {
             <div
                 className="absolute -bottom-2 h-[29px] px-3.5 py-[5px] bg-gradient-to-b from-[#28144f] to-[#06030a] rounded-[99px] justify-start items-center gap-[9px] inline-flex overflow-hidden w-fit text-nowrap">
                 <div className="w-[7px] h-[7px] relative bg-[#18f850] rounded-[99px]"/>
-                <div className="text-white text-[15px] font-bold font-['Feather']">Bonjour idriss</div>
+                <div className="text-white text-[15px] font-bold font-['Feather']">Bonjour</div>
             </div>
         </div>
     )
