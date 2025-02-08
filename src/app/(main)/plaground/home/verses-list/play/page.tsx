@@ -91,7 +91,7 @@ export default function PlayPage() {
     }, [completed])
 
     React.useEffect(() => {
-        if (progress >= 10 && progress < 60) {
+        if (progress >= 40 && progress < 60) {
             setInFlash(true)
             playSound({path: SoundList.flash, sound: 0.4})
 
@@ -101,7 +101,7 @@ export default function PlayPage() {
             }, 2000)
         }
 
-        if (progress >= 70 && progress < 80) {
+        if (progress >= 60 && progress < 90) {
             setInStar(true)
             playSound({path: SoundList.thunder, sound: 0.2})
 

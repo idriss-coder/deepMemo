@@ -27,7 +27,7 @@ export const CloseConfirm: React.FC<{
     return (
         <TransitionScreen className={cn(
             "bg-black/80",
-            isOpened ? "h-screen" : "h-0 overflow-hidden"
+            isOpened ? "h-full" : "h-0 overflow-hidden"
         )}>
 
             <div className={cn(
