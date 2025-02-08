@@ -79,7 +79,7 @@ export default function PlayPage() {
                 playSound({
                     path: pickRandom([SoundList.theme2, SoundList.theme1]),
                     replay: true,
-                    sound: soundThemeVolume ? +soundThemeVolume : 0.1
+                    sound: soundThemeVolume ? +soundThemeVolume : 0
                 })
                 clearTimeout(out)
             }, 1000)

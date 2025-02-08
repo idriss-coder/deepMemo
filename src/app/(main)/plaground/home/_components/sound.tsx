@@ -8,7 +8,7 @@ export const SoundThemRegulator = () => {
 
     return (
         <Slider
-            defaultValue={[sound ? +(sound) : 0.2]}
+            defaultValue={[sound ? +(sound) : 0.0]}
             max={1} step={0.1}
             onValueChange={(v) => {
                 localStorage.setItem("soundTheme", JSON.stringify(v[0]))
