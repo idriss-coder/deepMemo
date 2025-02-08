@@ -439,7 +439,8 @@ const EndStateScreen: React.FC<{
     return (
         <>
             {isOpened && <TransitionScreen>
-                <div className={"w-full h-fit py-8 pt-6 px-5 gap-4 flex flex-col justify-between bg-[#213037]"}>
+                <div
+                    className={"w-full h-fit py-8 pt-6 px-5 gap-4 flex flex-col justify-between bg-[#213037]"}>
                     <div className={"flex items-center gap-[11px]"}>
                         <DFlagIcon className={cn(
                             isError ? "text-[#CE5D55]" : "text-[#92d233]"

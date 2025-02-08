@@ -73,7 +73,7 @@ export const CloseConfirm: React.FC<{
 export const TransitionScreen: React.FC<React.HTMLAttributes<HTMLDivElement>> = ({children, className}) => {
     return (
         <div
-            className={cn("h-screen w-full fixed top-0 left-0 flex justify-between items-end", className)}>
+            className={cn("h-full w-full fixed top-0 left-0 flex justify-between items-end", className)}>
             {children}
         </div>
     )
