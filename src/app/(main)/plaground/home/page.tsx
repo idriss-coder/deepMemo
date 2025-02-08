@@ -52,6 +52,7 @@ const TrainingUser = () => {
 
     const [settingsOpen, setSettingsOpen] = React.useState(false)
     const $router = useRouter()
+    const sound = localStorage.getItem("soundTheme")
 
     return (
         <div
@@ -82,7 +83,7 @@ const TrainingUser = () => {
                             </label>
                             <div className={"flex-1"}>
                                 <Slider
-                                    defaultValue={[localStorage.getItem("soundTheme") ? +(localStorage.getItem("soundTheme")) : 0.2]}
+                                    defaultValue={[sound ? +(sound) : 0.2]}
                                     max={1} step={0.1}
                                     onValueChange={(v) => {
                                         localStorage.setItem("soundTheme", JSON.stringify(v[0]))
