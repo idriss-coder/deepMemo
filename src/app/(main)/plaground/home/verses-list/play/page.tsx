@@ -610,7 +610,7 @@ const EndStateScreen: React.FC<{
                             <div
                                 className="text-[#92d233] text-sm font-normal leading-snug"
                             >
-                                {pickRandom(missedAnswerMessages)}
+                                {pickRandom(missedAnswerMessages)} :
                             </div>
                             <div className="text-white/90 text-base font-bold font-['Feather']">{correctVerset}</div>
                         </div>

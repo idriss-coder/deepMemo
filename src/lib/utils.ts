@@ -40,26 +40,26 @@ export function normalizeVersetTitle(verset: Verset) {
 }
 
 export const missedAnswerMessages = [
-  "La bonne réponse, c’était celle-ci.",
-  "C’est celle-ci qu’il fallait sélectionner.",
-  "Et voilà la solution correcte que tu as manquée.",
-  "Le bon choix était en fait celui-là.",
-  "La réponse exacte était la suivante.",
-  "C’est cette solution qu’il fallait prendre.",
-  "Dommage, c’était celle-là la bonne.",
-  "C’est ici qu’était la bonne option.",
-  "C’est cette réponse qui était juste.",
+  "La bonne réponse, c’était celle-ci",
+  "C’est celle-ci qu’il fallait sélectionner",
+  "Et voilà la solution correcte que tu as manquée",
+  "Le bon choix était en fait celui-là",
+  "La réponse exacte était la suivante",
+  "C’est cette solution qu’il fallait prendre",
+  "Dommage, c’était celle-là la bonne",
+  "C’est ici qu’était la bonne option",
+  "C’est cette réponse qui était juste",
   "La bonne réponse, la voici !",
-  "C’est précisément elle qu’il fallait choisir.",
-  "Ce choix était le bon.",
-  "Ça se jouait sur celui-ci.",
-  "Regarde, c’était cette solution la bonne.",
-  "C’est elle, la réponse correcte.",
-  "La solution attendue se trouvait ici.",
-  "Cette option était la bonne.",
-  "C’est cette réponse qu’on attendait.",
-  "On visait exactement celle-ci.",
-  "Voilà, tu aurais dû cocher ça."
+  "C’est précisément elle qu’il fallait choisir",
+  "Ce choix était le bon",
+  "Ça se jouait sur celui-ci",
+  "Regarde, c’était cette solution la bonne",
+  "C’est elle, la réponse correcte",
+  "La solution attendue se trouvait ici",
+  "Cette option était la bonne",
+  "C’est cette réponse qu’on attendait",
+  "On visait exactement celle-ci",
+  "Voilà, tu aurais dû cocher ça"
 ];
 
 
