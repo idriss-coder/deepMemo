@@ -6,6 +6,7 @@ import {Input} from "@/components/ui/input";
 import {useRouter} from "next/navigation";
 import {DArrowGoIcon, DHeartGray} from "@/components/customize/icons";
 import {Button} from "@/components/ui/button";
+import Link from "next/link";
 
 export const BookSelectSection: React.FC<{ cb?: BookCallBack }> = ({cb}) => {
 
@@ -110,14 +111,25 @@ const SuggestionItem: React.FC<{ book: Book, cb?: BookCallBack }> = ({book, cb})
                     <div className="text-[#4e5b64] text-sm font-normal">{book.chapters} chap.</div>
                 </div>
             </div>
-            <Button
+            {cb ? <Button
                 withSound={!!cb}
                 soundMode={2}
                 size={"sm"}
                 onClick={onNavigate}
             >
                 <DArrowGoIcon className={"scale-150"}/>
-            </Button>
+            </Button> : (
+                <Link href={uri}>
+                    <Button
+                        withSound={!!cb}
+                        soundMode={2}
+                        size={"sm"}
+                        onClick={onNavigate}
+                    >
+                        <DArrowGoIcon className={"scale-150"}/>
+                    </Button>
+                </Link>
+            )}
         </div>
     )
 }

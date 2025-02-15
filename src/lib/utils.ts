@@ -192,5 +192,5 @@ export const playSound = ({path, replay = false, sound = 0.2}: { path: string, r
     // On peut gérer une erreur silencieuse, ou logguer si nécessaire
     console.error("Erreur lors de la lecture du son:", err);
   });
-  activeAudios.push(audio);0
+  activeAudios.push(audio);
 }
