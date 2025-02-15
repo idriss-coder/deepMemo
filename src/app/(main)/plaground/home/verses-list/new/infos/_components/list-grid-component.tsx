@@ -1,5 +1,5 @@
 import React from "react";
-import {cn} from "@/lib/utils";
+import {cn, playSound} from "@/lib/utils";
 import {CloseConfirm} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
 import {Trash2Icon} from "lucide-react";
 
@@ -8,10 +8,18 @@ interface ListGridProps {
     listCount: number
     max?: number
     onSelect: (v: number[]) => void
-    selectType: "unique" | "range"
+    selectType: "unique" | "range",
+    isGame?: boolean
 }
 
-export const ListGrid: React.FC<ListGridProps> = ({listTitle, listCount, max = 1, onSelect, selectType = "unique"}) => {
+export const ListGrid: React.FC<ListGridProps> = ({
+                                                      listTitle,
+                                                      listCount,
+                                                      max = 1,
+                                                      onSelect,
+                                                      selectType = "unique",
+                                                      isGame
+                                                  }) => {
     const [actives, setActives] = React.useState<number[]>([])
     const [rangeStart, setRangeStart] = React.useState<number | null>(null)
 
@@ -54,7 +62,10 @@ export const ListGrid: React.FC<ListGridProps> = ({listTitle, listCount, max = 1
 
                     return (
                         <button
-                            onClick={() => handleSelection(number)}
+                            onClick={() => {
+                                if (isGame) playSound({path: "/assets/sound/bouton_click.mp3"})
+                                handleSelection(number)
+                            }}
                             key={number}
                             className={cn(
                                 "aspect-square rounded-lg text-xl font-semibold flex items-center justify-center transition font-['Feather']",

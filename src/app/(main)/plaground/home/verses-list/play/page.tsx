@@ -1,7 +1,15 @@
 "use client"
 
 import {Button} from "@/components/ui/button";
-import {DCloseIcon, DFlagIcon, DHeartGray, DHeartRedIcon, DMisteryBoxIcon, DXPIcon} from "@/components/customize/icons";
+import {
+    DCloseIcon,
+    DFlagIcon,
+    DGuardIcon,
+    DHeartGray,
+    DHeartRedIcon,
+    DMisteryBoxIcon,
+    DXPIcon
+} from "@/components/customize/icons";
 import {AnimatePresence, motion} from "framer-motion";
 import React, {useEffect, useMemo, useState} from "react";
 import {
@@ -203,12 +211,15 @@ export default function PlayPage() {
                     }}
                 />
 
-                {!difficultOpen && <PlayProgress
-                    progress={progress}
-                    onCloseClick={() => setRequestClose(true)}
-                    count={lives}
-                    withEffect={accWinCount >= BONUS_EFFECT_STATE}
-                />}
+                {!difficultOpen && (
+                    <PlayProgress
+                        acc={accWinCount}
+                        progress={progress}
+                        onCloseClick={() => setRequestClose(true)}
+                        count={lives}
+                        withEffect={accWinCount >= BONUS_EFFECT_STATE}
+                    />
+                )}
 
                 <div className={cn(
                     "h-screen top-0 absolute",
@@ -234,6 +245,7 @@ export default function PlayPage() {
                     mode={difficult}
                     isOldError={isHard ? (currentQuestion.missedCount > 0 && !hardSelected) : (currentQuestion.missedCount > 0 && !selectedVertset)}
                     verset={currentQuestion.target}
+                    verses={currentQuestion.outputsOptions}
                 />
                 {!difficultOpen && <>
                     {isHard ?
@@ -303,28 +315,36 @@ const PlayProgress: React.FC<{
     onCloseClick: () => void,
     progress: number,
     count: number,
-    withEffect: boolean
+    withEffect: boolean,
+    acc: number
 }> = ({
           onCloseClick,
           progress,
           count,
-          withEffect
+          withEffect,
+          acc
       }) => {
 
     return (
-        <div className={"flex items-center gap-[15px] relative"}>
-            <button onClick={() => {
-                onCloseClick()
-            }}>
-                <DCloseIcon/>
-            </button>
-            <ProgressBar
-                withEffect={withEffect}
-                progress={progress}
-            />
-            <HeartCount
-                count={count}
-            />
+        <div className={"relative"}>
+            <div className={"flex items-center gap-[15px] relative"}>
+                <button onClick={() => {
+                    onCloseClick()
+                }}>
+                    <DCloseIcon/>
+                </button>
+                <ProgressBar
+                    withEffect={withEffect}
+                    progress={progress}
+                />
+                <HeartCount
+                    count={count}
+                />
+            </div>
+            {withEffect && <div className={"flex items-center justify-center gap-1 top-1 w-full absolute -bottom-9"}>
+                <DGuardIcon/>
+                <div className="text-center text-[#ffc800] text-xs font-normal">{acc} d’affilés</div>
+            </div>}
         </div>
     )
 }
@@ -417,12 +437,18 @@ const ProgressBar: React.FC<{ progress: number, withEffect: boolean }> = ({progr
     )
 }
 
-const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean, hardInfos?: SimpleBook, mode?: Difficult }> = ({
-                                                                                                                   verset,
-                                                                                                                   isOldError,
-                                                                                                                   hardInfos,
-                                                                                                                   mode
-                                                                                                               }) => {
+const PlayInfo: React.FC<{
+    verset: Verset,
+    isOldError: boolean,
+    hardInfos?: SimpleBook,
+    mode?: Difficult,
+    verses: Verset[]
+}> = ({
+          verset,
+          isOldError,
+          hardInfos,
+          mode
+      }) => {
 
     const playState = useMemo(() => {
         if (mode == Difficult.CLASSIC) return "Séléctionne le bon verset"

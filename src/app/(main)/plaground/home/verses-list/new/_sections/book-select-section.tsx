@@ -60,7 +60,7 @@ const SearchSuggestion: React.FC<{ books: Book[], cb?: BookCallBack }> = ({books
 
     return (
         <div className={"flex flex-col gap-[16px]"}>
-            <div className="text-white text-xl font-bold font-['Feather']">Suggestion de livre</div>
+            {!cb && <div className="text-white text-xl font-bold font-['Feather']">Suggestion de livre</div>}
             <SuggestionList
                 books={books}
                 cb={cb}
@@ -111,6 +111,8 @@ const SuggestionItem: React.FC<{ book: Book, cb?: BookCallBack }> = ({book, cb})
                 </div>
             </div>
             <Button
+                withSound={!!cb}
+                soundMode={2}
                 size={"sm"}
                 onClick={onNavigate}
             >

@@ -31,7 +31,7 @@ export const DifficultSelectScreen: React.FC<{
     const isHard = selected == Difficult.HARD
 
     return (
-        <TransitionScreen className="bg-bgPrimary z-30 flex items-start pt-6 px-4">
+        <TransitionScreen className="bg-bgPrimary z-40 flex items-start pt-6 px-4">
             <div className="flex flex-col items-center justify-center w-full">
                 <BackButton
                     isClose={true}
