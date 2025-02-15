@@ -4,6 +4,11 @@ import {type ClassValue, clsx} from "clsx"
 import {twMerge} from "tailwind-merge"
 import {Verset} from "@/lib/db";
 
+export enum Difficult {
+  CLASSIC = "CLASSIC",
+  HARD = "HARD"
+}
+
 export enum SoundList {
   gameStarted = "/assets/sound/start/start.mp3",
   gameEnded = "/assets/sound/partyEnded.mp3",

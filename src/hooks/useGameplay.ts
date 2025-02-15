@@ -2,8 +2,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Verset} from "@/lib/db";
 import {useVerses} from './useVerses';
-import {Difficult} from "@/app/(main)/plaground/home/verses-list/play/page";
-import {shuffleArray} from "@/lib/utils"; // Hook d’exemple fourni
+import {Difficult, shuffleArray} from "@/lib/utils"; // Hook d’exemple fourni
 
 export interface QuizItem {
     id: number;               // question index (0-based)

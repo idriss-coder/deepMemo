@@ -1,15 +1,19 @@
 "use client"
 
 import React, {useMemo} from "react";
-import {Difficult} from "@/app/(main)/plaground/home/verses-list/play/page";
 import {TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
 import {BackButton} from "@/components/customize/utils";
 import {Button} from "@/components/ui/button";
 import {DBookIcon, HardLevelIcon, LowLevelIcon} from "@/components/customize/icons";
-import {cn} from "@/lib/utils";
+import {cn, Difficult} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
 import hardMascot from "@/effect/hard-mascot.json";
-import Lottie from "lottie-react";
+import dynamic from "next/dynamic";
+
+const Lottie = dynamic(
+    () => import('lottie-react'),
+    {ssr: false}
+)
 
 export const DifficultSelectScreen: React.FC<{
     isOpen: boolean

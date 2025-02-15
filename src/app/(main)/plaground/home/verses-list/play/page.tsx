@@ -15,6 +15,7 @@ import {AnimatePresence, motion} from "framer-motion";
 import React, {useEffect, useMemo, useState} from "react";
 import {
     cn,
+    Difficult,
     getRandomEncouragement,
     getRandomErrorMessage,
     missedAnswerMessages,
@@ -42,10 +43,6 @@ const Lottie = dynamic(
     {ssr: false}
 )
 
-export enum Difficult {
-    CLASSIC = "CLASSIC",
-    HARD = "HARD"
-}
 
 const BONUS_EFFECT_STATE = 2
 
