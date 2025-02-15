@@ -55,7 +55,7 @@ export const DifficultSelectScreen: React.FC<{
                 </motion.div>
             </div>
             <motion.div
-                className="mb-8 py-8 pt-2 px-5 fixed bottom-0 right-0 w-full"
+                className="mb-8 py-8 pt-2 pb-3 px-5 fixed bottom-0 right-0 w-full"
                 initial={{opacity: 0, y: 50}}
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.5, delay: 0.2}}
