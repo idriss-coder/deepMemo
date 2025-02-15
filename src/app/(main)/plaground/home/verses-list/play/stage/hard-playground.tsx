@@ -111,7 +111,7 @@ export const HardPlayground: React.FC<{
 
             <ScrollArea
                 className={
-                    "h-[460px] sm:h-[400px] md:h-[400px] lg:h-[400px] xl:h-[400px] 2xl:h-[400px] screen-h-adjust"
+                    "h-[440px] sm:h-[400px] md:h-[400px] lg:h-[400px] xl:h-[400px] 2xl:h-[400px] screen-h-adjust"
                 }
             >
                 <AnimatePresence mode="wait">
