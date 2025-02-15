@@ -249,10 +249,19 @@ export const DChevronLeft: React.FC<NavItemIconProps> = ({...props}) => {
     )
 }
 
+export const DExplainIcon: React.FC<NavItemIconProps> = ({...props}) => {
+    return (
+        <svg width="23" height="24" viewBox="0 0 23 24" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <rect x="2" y="2.5" width="19" height="19" rx="9.5" stroke="#42E1B1" strokeWidth="4"/>
+        </svg>
+
+    )
+}
+
 export const DGuardIcon: React.FC<NavItemIconProps> = ({...props}) => {
     return (
         <svg width="11" height="13" viewBox="0 0 11 13" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
-            <g clip-path="url(#clip0_501_1545)">
+            <g clipPath="url(#clip0_501_1545)">
                 <path
                     d="M1.87228 1.19234H9.12792C10.1615 1.19234 11 2.01891 11 3.0383V7.42278C11 10.2269 8.69477 12.5 5.85096 12.5H5.14925C2.30523 12.5 0 10.2269 0 7.42298V3.03851C0 2.01891 0.838283 1.19234 1.87228 1.19234Z"
                     fill="#AAC1D4"/>

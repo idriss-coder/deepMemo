@@ -3,6 +3,7 @@
 import {Button} from "@/components/ui/button";
 import {
     DCloseIcon,
+    DExplainIcon,
     DFlagIcon,
     DGuardIcon,
     DHeartGray,
@@ -28,7 +29,7 @@ import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses
 import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
 import {bookMapById, SimpleBook} from "@/backend/mock/bible-book";
-import {CheckCircle, Heart, LoaderIcon} from "lucide-react";
+import {Heart, LoaderIcon} from "lucide-react";
 import dynamic from 'next/dynamic'
 import flashLotie from "@/effect/flash.json"
 import starLotie from "@/effect/star.json"
@@ -614,7 +615,7 @@ const EndStateScreen: React.FC<{
                             </div>
                             <div className="text-white/90 text-base font-bold font-['Feather']">{correctVerset}</div>
                         </div>
-                        <CheckCircle className={"text-sm text-gray-600"}/>
+                        <DExplainIcon className={"text-sm text-gray-600"}/>
                     </div>}
                     <Button
                         variant={isError ? "red" : "green"}
