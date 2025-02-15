@@ -3,7 +3,7 @@
 import {Button} from "@/components/ui/button";
 import {DCloseIcon, DFlagIcon, DHeartGray, DHeartRedIcon, DMisteryBoxIcon, DXPIcon} from "@/components/customize/icons";
 import {AnimatePresence, motion} from "framer-motion";
-import React, {useEffect, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import {
     cn,
     getRandomEncouragement,
@@ -18,18 +18,23 @@ import {useRouter} from "next/navigation";
 import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
 import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
-import {bookMapById} from "@/backend/mock/bible-book";
+import {bookMapById, SimpleBook} from "@/backend/mock/bible-book";
 import {Heart, LoaderIcon} from "lucide-react";
 import dynamic from 'next/dynamic'
 import flashLotie from "@/effect/flash.json"
 import starLotie from "@/effect/star.json"
+import {DifficultSelectScreen} from "@/app/(main)/plaground/home/verses-list/play/stage/dificult-select";
+import {HardPlayground} from "@/app/(main)/plaground/home/verses-list/play/stage/hard-playground";
 
 const Lottie = dynamic(
     () => import('lottie-react'),
     {ssr: false}
 )
 
-const MAX_HEART = 4
+export enum Difficult {
+    CLASSIC = "CLASSIC",
+    HARD = "HARD"
+}
 
 export default function PlayPage() {
 
@@ -45,6 +50,10 @@ export default function PlayPage() {
     const [inFlash, setInFlash] = React.useState(false);
     const [inStar, setInStar] = React.useState(false);
 
+    const [hardSelected, setHardSelected] = React.useState<SimpleBook>({});
+
+    const [difficultOpen, setDifficultOpen] = React.useState(true)
+
     const {
         quizData,
         currentQuestion,
@@ -54,9 +63,20 @@ export default function PlayPage() {
         nextQuestion,
         lives,
         setLives,
-        score,
-
+        difficult,
+        setDifficult,
     } = useGameplayArea();
+
+    const isHard = useMemo(() => {
+        return difficult == Difficult.HARD
+    }, [difficult])
+
+    useEffect(() => {
+        const storedDifficult = localStorage.getItem("difficult");
+        if (storedDifficult) {
+            setDifficult(JSON.parse(storedDifficult) as Difficult)
+        } else setDifficult(Difficult.CLASSIC)
+    }, [setDifficult]);
 
     useEffect(() => {
         function handleUserInteraction() {
@@ -157,7 +177,20 @@ export default function PlayPage() {
 
     if (currentQuestion) {
         return (
-            <div className={"px-[20px] py-[20px] flex flex-col gap-[40px] relative"}>
+            <div className={"px-[20px] py-[20px] flex flex-col gap-[30px] relative"}>
+
+                <DifficultSelectScreen
+                    isOpen={difficultOpen}
+                    onDifficultChange={(d) => {
+                        setDifficult(d)
+                        localStorage.setItem("difficult", JSON.stringify(d))
+                    }}
+                    selected={difficult}
+                    onClose={() => {
+                        setDifficultOpen(false)
+                    }}
+                />
+
                 <PlayProgress
                     progress={progress}
                     onCloseClick={() => setRequestClose(true)}
@@ -184,22 +217,45 @@ export default function PlayPage() {
                 </div>
 
                 <PlayInfo
-                    isOldError={currentQuestion.missedCount > 0 && !selectedVertset}
+                    hardInfos={hardSelected}
+                    mode={difficult}
+                    isOldError={isHard ? (currentQuestion.missedCount > 0 && !hardSelected) : (currentQuestion.missedCount > 0 && !selectedVertset)}
                     verset={currentQuestion.target}
                 />
-                <PlayPlayground
-                    selectedVerse={selectedVertset}
-                    verses={currentQuestion.outputsOptions}
-                    onSelectVerset={v => {
-                        setSelectedVertset(v)
-                        handleAnswer(v)
-                    }}
-                />
+
+                {isHard ?
+                    <HardPlayground
+                        selected={hardSelected}
+                        onSelect={v => {
+                            setHardSelected(v)
+                            if (v.bookId && v.chapter && v.verses) {
+                                handleAnswer({
+                                    book_num: v.bookId,
+                                    chapter_num: v.chapter,
+                                    verses_num: v.verses
+                                } as Verset, difficult)
+                            }
+                        }}
+                    /> :
+                    <PlayPlayground
+                        selectedVerse={selectedVertset}
+                        verses={currentQuestion.outputsOptions}
+                        onSelectVerset={v => {
+                            setSelectedVertset(v)
+                            handleAnswer(v, difficult)
+                        }}
+                    />
+                }
                 <PlayConfirm
+                    mode={difficult}
+                    hardInfos={hardSelected}
                     selectedVerset={selectedVertset}
                     onConfirm={() => {
-                        if (selectedVertset) {
-                            console.log("On press")
+                        if (!isHard && selectedVertset) {
+                            onAnswer()
+                        }
+
+                        if (isHard && hardSelected) {
                             onAnswer()
                         }
                     }}
@@ -332,7 +388,20 @@ const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
     )
 }
 
-const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean }> = ({verset, isOldError}) => {
+const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean, hardInfos?: SimpleBook, mode?: Difficult }> = ({
+                                                                                                                   verset,
+                                                                                                                   isOldError,
+                                                                                                                   hardInfos,
+                                                                                                                   mode
+                                                                                                               }) => {
+
+    const playState = useMemo(() => {
+        if (mode == Difficult.CLASSIC) return "Séléctionne le bon verset"
+
+        if (!hardInfos?.bookId) return "Séléctionne le livre"
+        if (hardInfos?.bookId && !hardInfos.chapter) return "Séléctionne le chapitre"
+        if (hardInfos?.chapter) return "Séléctionne le(s) verset(s)"
+    }, [hardInfos, mode])
 
     return (
         <div className={"flex flex-col gap-[10px]"}>
@@ -343,7 +412,7 @@ const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean }> = ({verset, is
                 </div>
             )}
             <div className="text-white text-xl font-bold font-['Feather']">
-                Séléctionne le bon verset
+                {playState}
             </div>
             <div
                 className="text-white/80 text-base font-normal leading-[30px]"
@@ -354,23 +423,45 @@ const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean }> = ({verset, is
     )
 }
 
-const PlayConfirm: React.FC<{ selectedVerset: Verset | undefined, onConfirm: () => void }> = ({
-                                                                                                  selectedVerset,
-                                                                                                  onConfirm
-                                                                                              }) => {
+const PlayConfirm: React.FC<{
+    selectedVerset: Verset | undefined,
+    onConfirm: () => void,
+    hardInfos: SimpleBook,
+    mode?: Difficult
+}> = ({
+          selectedVerset,
+          onConfirm,
+          mode,
+          hardInfos,
+      }) => {
 
+    const enabled = useMemo(() => {
+        if (mode == Difficult.HARD) {
+            return (hardInfos.bookId && hardInfos.chapter && hardInfos.verses)
+        } else {
+            return !!selectedVerset
+        }
+    }, [selectedVerset, mode, hardInfos])
 
     return (
         <motion.div
-            className="px-[20px] py-8 flex flex-col gap-2 items-center justify-center bg-gradient-to-b from-[#141f25]/0 via-[#141f25] to-[#141f25] fixed bottom-0 right-0 w-full"
+            className="px-[20px] py-8 flex flex-col gap-4 items-center justify-center bg-gradient-to-b from-[#141f25]/0 via-[#141f25] to-[#141f25] fixed bottom-0 right-0 w-full"
             initial={{opacity: 0, y: 0}}
             animate={{opacity: 1, y: 0}}
             transition={{delay: 0.2, duration: 0.3}}
         >
+            {/*<div className={"flex items-center justify-start gap-3 w-full"}>*/}
+            {/*    <DBookIcon className={"text-green-500"} width={20} height={20}/>*/}
+            {/*    <div*/}
+            {/*        className="text-[#4e5b64] text-sm font-normal leading-snug"*/}
+            {/*    >*/}
+            {/*        Sélecttionne le chapitre*/}
+            {/*    </div>*/}
+            {/*</div>*/}
             <Button
-                variant={selectedVerset ? "green" : "disabled"}
+                variant={enabled ? "green" : "disabled"}
                 className="w-full"
-                disabled={!selectedVerset}
+                disabled={!enabled}
                 onClick={onConfirm}
             >
                 Valider
@@ -485,10 +576,7 @@ const ClosePartyScreen: React.FC<{ state: "closed" | "opened", onCloseCancel: ()
             onCloseCancel={onCloseCancel}
             icon={<DXPIcon/>}
             title={"Tu veux vraiment arrêter ?"}
-            subTitle={` Si tu arrete maintenant, tu perdras toutes ta progression et lors de ton prochain
-                                entrainement
-                                tu
-                                devras recommencer to progrssion à zéro.`}
+            subTitle={`"Si tu arrêtes maintenant, tu perdras toute ta progression. Lors de ta prochaine session, tu devras tout reprendre à zéro.`}
             cancelText={"Continuer"}
             performText={"Terminer la session"}
             performAction={() => {
@@ -546,7 +634,8 @@ const EndPartyScreen: React.FC<{ score: number }> = ({score}) => {
 
                 </div>
             </div>
-            <div className={"mb-8"}>
+            <div></div>
+            <div className={"mb-8 py-8 px-5 fixed bottom-0 right-0 w-full"}>
                 <Button
                     variant={"default"}
                     className="w-full"

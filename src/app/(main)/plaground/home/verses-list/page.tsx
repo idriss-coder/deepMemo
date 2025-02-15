@@ -107,21 +107,40 @@ const NewVerset = () => {
     )
 }
 
-const EmptyVerses: React.FC<{ verses: Verset[] }> = ({verses}) => {
+interface EmptyVersesProps {
+    verses: Verset[];
+}
+
+const EmptyVerses: React.FC<EmptyVersesProps> = ({verses}) => {
+    const verseCount = verses.length;
+    const needed = 5 - verseCount;
 
     return (
-        <div className={"flex flex-col items-center gap-[11.5px]"}>
+        <div className="flex flex-col items-center gap-[11.5px]">
             <DArrowTop/>
             <div className="w-[341px] text-center text-[#4e5b64] text-sm font-normal leading-snug">
-                {verses.length == 0 ? ` Tu n’a
-                pas encore des versets pour t’entrainer. Clique ici pour ajouter tes versets favorites pour
-                l’entrainement.` : <span>
-                    Ajoute encore minimum {5 - verses.length} versets favoris pour débuter la partie
-                </span>}
+                {verseCount === 0 ? (
+                    <span>
+            Holà <strong>aventurier biblique</strong> ! Tu n’as pas encore
+            ajouté de verset favori. Clique ici pour en ajouter et débloquer ta
+            première mission&nbsp;!
+          </span>
+                ) : needed > 0 ? (
+                    <span>
+            Super, tu as déjà {verseCount} verset(s) favori(s) ! Encore{" "}
+                        <strong>{needed}</strong> à ajouter pour lancer l’entraînement et
+            décrocher la victoire&nbsp;!
+          </span>
+                ) : (
+                    <span>
+            Wohoo&nbsp;! Tu as suffisamment de versets pour démarrer le quiz.
+            Prépare-toi et montre de quoi tu es capable&nbsp;!
+          </span>
+                )}
             </div>
         </div>
-    )
-}
+    );
+};
 
 const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 

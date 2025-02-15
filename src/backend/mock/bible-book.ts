@@ -1,3 +1,9 @@
+export type SimpleBook = {
+    bookId?: number
+    chapter?: number
+    verses?: number[]
+}
+
 export type Book = {
     id: number
     label: string

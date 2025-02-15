@@ -79,6 +79,16 @@ body {
   }
 }
 
+@layer utilities {
+  @media (max-height: 600px) {
+    .screen-h-adjust {
+      height: 400px !important;
+    }
+  }
+}
+
+
+
 @font-face {
   font-family: "Feather";
   src: url("/fonts/14936bb7a4b6575fd2eee80a3ab52cc2.eot");

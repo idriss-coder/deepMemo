@@ -1,7 +1,8 @@
 // useGameplayArea.ts
-import {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Verset} from "@/lib/db";
-import {useVerses} from './useVerses'; // Hook d’exemple fourni
+import {useVerses} from './useVerses';
+import {Difficult} from "@/app/(main)/plaground/home/verses-list/play/page"; // Hook d’exemple fourni
 
 export interface QuizItem {
     id: number;               // question index (0-based)
@@ -49,6 +50,8 @@ export function useGameplayArea() {
     const [quizData, setQuizData] = useState<QuizItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [completed, setCompleted] = useState<boolean>(false);
+    const [difficult, setDifficult] = React.useState<Difficult>()
+
 
     // Ajout de mécaniques supplémentaires
     const [score, setScore] = useState<number>(0);
@@ -95,15 +98,35 @@ export function useGameplayArea() {
      * Gère la sélection d’une réponse par l’utilisateur
      */
     const handleAnswer = useCallback(
-        (selectedOption: Verset) => {
+        (selectedOption: Verset, mode?: Difficult) => {
             setQuizData((prev) => {
                 const updated = [...prev];
                 const current = updated[currentIndex];
 
+                const isHard = mode === Difficult.HARD;
+
                 if (current) {
                     current.userAnswer = selectedOption;
-                    current.isCorrect = (selectedOption.id === current.target.id);
-                    current.isOldError = !current.isCorrect;
+
+                    console.log(`Difficul: ${mode} => ${isHard}`)
+
+                    if (isHard) {
+                        const target = current.target
+
+                        const isSameBook = target.book_num === selectedOption.book_num;
+                        const isSameChapter = target.chapter_num === selectedOption.chapter_num;
+                        const isSameVerses =
+                            target.verses_num.length === selectedOption.verses_num.length &&
+                            target.verses_num.every((val, index) => val === selectedOption.verses_num[index]);
+
+                        const selectedResult = (isSameBook && isSameChapter && isSameVerses)
+
+                        current.isCorrect = selectedResult;
+                        current.isOldError = !selectedResult;
+                    } else {
+                        current.isCorrect = (selectedOption.id === current.target.id);
+                        current.isOldError = !current.isCorrect;
+                    }
 
                     if (current.isCorrect) {
                         // Incrémente le score
@@ -232,6 +255,8 @@ export function useGameplayArea() {
     const currentQuestion = quizData[currentIndex];
 
     return {
+        difficult,
+        setDifficult,
         quizData,
         currentIndex,
         currentQuestion,
