@@ -71,7 +71,7 @@ const SearchSuggestion: React.FC<{ books: Book[], cb?: BookCallBack }> = ({books
 
 const SuggestionList: React.FC<{ books: Book[], cb?: BookCallBack }> = ({books, cb}) => {
     return (
-        <div className={"flex flex-col gap-[18px]"}>
+        <div className={"flex flex-col gap-[18px] pb-24"}>
             {books.map(b => (
                 <SuggestionItem
                     book={b}

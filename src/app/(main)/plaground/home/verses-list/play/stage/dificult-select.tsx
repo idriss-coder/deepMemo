@@ -8,6 +8,8 @@ import {Button} from "@/components/ui/button";
 import {DBookIcon, HardLevelIcon, LowLevelIcon} from "@/components/customize/icons";
 import {cn} from "@/lib/utils";
 import {AnimatePresence, motion} from "framer-motion";
+import hardMascot from "@/effect/hard-mascot.json";
+import Lottie from "lottie-react";
 
 export const DifficultSelectScreen: React.FC<{
     isOpen: boolean
@@ -25,6 +27,8 @@ export const DifficultSelectScreen: React.FC<{
     }, [selected])
 
     if (!isOpen) return
+
+    const isHard = selected == Difficult.HARD
 
     return (
         <TransitionScreen className="bg-bgPrimary z-30 flex items-start pt-6 px-4">
@@ -47,7 +51,7 @@ export const DifficultSelectScreen: React.FC<{
                 </motion.div>
             </div>
             <motion.div
-                className="mb-8 py-8 px-5 fixed bottom-0 right-0 w-full"
+                className="mb-8 py-8 pt-2 px-5 fixed bottom-0 right-0 w-full"
                 initial={{opacity: 0, y: 50}}
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.5, delay: 0.2}}
@@ -58,7 +62,17 @@ export const DifficultSelectScreen: React.FC<{
                             key={selected}
                             className="mb-8 flex flex-col gap-5 items-center"
                         >
-                            <DBookIcon/>
+                            {isHard ? <div className={""}>
+                                <div className={"-mb-[70px] w-[300px] h-[300px]"}>
+                                    <Lottie
+                                        animationData={hardMascot}
+                                        loop={false}
+                                        autoplay={true}
+                                        width={300}
+                                        height={300}
+                                    />
+                                </div>
+                            </div> : <DBookIcon/>}
                             <motion.p
                                 className="text-center text-[#4e5b64] text-sm font-normal leading-snug"
                                 initial={{opacity: 0}}

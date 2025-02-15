@@ -8,6 +8,7 @@ import {
     cn,
     getRandomEncouragement,
     getRandomErrorMessage,
+    missedAnswerMessages,
     normalizeVersetTitle,
     pickRandom,
     playSound,
@@ -19,12 +20,13 @@ import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses
 import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
 import {bookMapById, SimpleBook} from "@/backend/mock/bible-book";
-import {Heart, LoaderIcon} from "lucide-react";
+import {CheckCircle, Heart, LoaderIcon} from "lucide-react";
 import dynamic from 'next/dynamic'
 import flashLotie from "@/effect/flash.json"
 import starLotie from "@/effect/star.json"
 import {DifficultSelectScreen} from "@/app/(main)/plaground/home/verses-list/play/stage/dificult-select";
 import {HardPlayground} from "@/app/(main)/plaground/home/verses-list/play/stage/hard-playground";
+import accEnabled from "@/effect/acc-enabled.json";
 
 const Lottie = dynamic(
     () => import('lottie-react'),
@@ -35,6 +37,8 @@ export enum Difficult {
     CLASSIC = "CLASSIC",
     HARD = "HARD"
 }
+
+const BONUS_EFFECT_STATE = 2
 
 export default function PlayPage() {
 
@@ -49,6 +53,7 @@ export default function PlayPage() {
     const [hasStarted, setHasStarted] = useState(false);
     const [inFlash, setInFlash] = React.useState(false);
     const [inStar, setInStar] = React.useState(false);
+    const [accWinCount, setAccWinCount] = React.useState(0);
 
     const [hardSelected, setHardSelected] = React.useState<SimpleBook>({});
 
@@ -116,7 +121,7 @@ export default function PlayPage() {
     }, [completed])
 
     React.useEffect(() => {
-        if (progress >= 50 && progress < 70) {
+        if (accWinCount == BONUS_EFFECT_STATE) {
             setInFlash(true)
             playSound({path: SoundList.flash, sound: 0.4})
 
@@ -126,16 +131,16 @@ export default function PlayPage() {
             }, 2000)
         }
 
-        if (progress >= 70) {
+        if (accWinCount > BONUS_EFFECT_STATE) {
             setInStar(true)
-            playSound({path: SoundList.thunder, sound: 0.2})
+            playSound({path: SoundList.star, sound: 0.2})
 
             const timer = setTimeout(() => {
                 setInStar(false)
                 clearTimeout(timer)
             }, 1600)
         }
-    }, [progress])
+    }, [accWinCount])
 
     if (quizData.length === 0) {
         return <div>Loading...</div>;
@@ -147,6 +152,7 @@ export default function PlayPage() {
 
     const onNextQuestion = () => {
         setSelectedVertset(undefined)
+        setHardSelected({})
         setEndStateOpen(false)
         nextQuestion()
     }
@@ -157,7 +163,12 @@ export default function PlayPage() {
         const totalQuestions = quizData.length;
 
         if (currentQuestion && currentQuestion.isCorrect) {
+
+            const currentWinCount = accWinCount + 1
+            setAccWinCount(currentWinCount)
+
             if (totalQuestions > 0) {
+
                 const result = Math.round(
                     (((currentIndex + 1)) / totalQuestions) * 100
                 )
@@ -168,6 +179,7 @@ export default function PlayPage() {
             playSound({path: pickRandom([SoundList.sellectWin1, SoundList.sellectWin2, SoundList.sellectWin3])})
             setIsWin(true)
         } else {
+            setAccWinCount(0)
             setWrongCount(wrongCount + 1)
             setLives(lives - 1)
             setIsWin(false)
@@ -191,11 +203,12 @@ export default function PlayPage() {
                     }}
                 />
 
-                <PlayProgress
+                {!difficultOpen && <PlayProgress
                     progress={progress}
                     onCloseClick={() => setRequestClose(true)}
                     count={lives}
-                />
+                    withEffect={accWinCount >= BONUS_EFFECT_STATE}
+                />}
 
                 <div className={cn(
                     "h-screen top-0 absolute",
@@ -222,30 +235,32 @@ export default function PlayPage() {
                     isOldError={isHard ? (currentQuestion.missedCount > 0 && !hardSelected) : (currentQuestion.missedCount > 0 && !selectedVertset)}
                     verset={currentQuestion.target}
                 />
-
-                {isHard ?
-                    <HardPlayground
-                        selected={hardSelected}
-                        onSelect={v => {
-                            setHardSelected(v)
-                            if (v.bookId && v.chapter && v.verses) {
-                                handleAnswer({
-                                    book_num: v.bookId,
-                                    chapter_num: v.chapter,
-                                    verses_num: v.verses
-                                } as Verset, difficult)
-                            }
-                        }}
-                    /> :
-                    <PlayPlayground
-                        selectedVerse={selectedVertset}
-                        verses={currentQuestion.outputsOptions}
-                        onSelectVerset={v => {
-                            setSelectedVertset(v)
-                            handleAnswer(v, difficult)
-                        }}
-                    />
-                }
+                {!difficultOpen && <>
+                    {isHard ?
+                        <HardPlayground
+                            selected={hardSelected}
+                            verses={currentQuestion.outputsOptions}
+                            onSelect={v => {
+                                setHardSelected(v)
+                                if (v.bookId && v.chapter && v.verses) {
+                                    handleAnswer({
+                                        book_num: v.bookId,
+                                        chapter_num: v.chapter,
+                                        verses_num: v.verses
+                                    } as Verset, difficult)
+                                }
+                            }}
+                        /> :
+                        <PlayPlayground
+                            selectedVerse={selectedVertset}
+                            verses={currentQuestion.outputsOptions}
+                            onSelectVerset={v => {
+                                setSelectedVertset(v)
+                                handleAnswer(v, difficult)
+                            }}
+                        />
+                    }
+                </>}
                 <PlayConfirm
                     mode={difficult}
                     hardInfos={hardSelected}
@@ -261,8 +276,10 @@ export default function PlayPage() {
                     }}
                 />
                 <EndStateScreen
+                    correctVerset={`${bookMapById.get(currentQuestion.target.book_num)?.label} ${normalizeVersetTitle(currentQuestion.target)}`}
                     variant={isWin ? "success" : "error"}
                     state={endStateOpen ? "opened" : "closed"}
+
                     onConfirm={() => {
                         onNextQuestion()
                     }}
@@ -285,21 +302,24 @@ export default function PlayPage() {
 const PlayProgress: React.FC<{
     onCloseClick: () => void,
     progress: number,
-    count: number
+    count: number,
+    withEffect: boolean
 }> = ({
           onCloseClick,
           progress,
-          count
+          count,
+          withEffect
       }) => {
 
     return (
-        <div className={"flex items-center gap-[15px]"}>
+        <div className={"flex items-center gap-[15px] relative"}>
             <button onClick={() => {
                 onCloseClick()
             }}>
                 <DCloseIcon/>
             </button>
             <ProgressBar
+                withEffect={withEffect}
                 progress={progress}
             />
             <HeartCount
@@ -322,7 +342,7 @@ const HeartCount: React.FC<HeartCountProps> = ({count}) => {
         }, 1000) // Show all hearts for 2 seconds before animating
 
         return () => clearTimeout(timer)
-    }, [])
+    }, [count])
 
     return (
         <div className="flex items-center gap-2">
@@ -357,17 +377,26 @@ const HeartCount: React.FC<HeartCountProps> = ({count}) => {
 }
 
 
-const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
+const ProgressBar: React.FC<{ progress: number, withEffect: boolean }> = ({progress, withEffect}) => {
 
     return (
-        <div className={"flex-1"}>
+        <div className={"flex-1 relative"}>
+            <div className={"-mb-[70px] w-[60px] h-[60px] absolute -top-5 -right-3"}>
+                {withEffect && <Lottie
+                    animationData={accEnabled}
+                    loop={true}
+                    autoplay={true}
+                    width={60}
+                    height={60}
+                />}
+            </div>
             <div className={cn(
-                "relative h-[18px] overflow-hidden  rounded-full  bg-[#38444d]",
+                "relative h-[18px] overflow-hidden  rounded-full  bg-[#38444d] transition-all",
             )}>
                 <motion.div
                     className={cn(
-                        "absolute top-0 left-0 h-full bg-gradient-to-r ",
-                        progress >= 50 ? "from-[#ffd900] to-[#ffd900]/85" : "from-lime-400 to-lime-500"
+                        "absolute  top-0 left-0 h-full bg-gradient-to-r ",
+                        withEffect ? "from-[#ffd900] to-[#ffd900]/85" : "from-lime-400 to-lime-500"
                     )}
                     initial={{width: 0}}
                     animate={{width: `${progress}%`}}
@@ -380,7 +409,7 @@ const ProgressBar: React.FC<{ progress: number }> = ({progress}) => {
                     }}
                 >
                     {progress > 20 &&
-                        (<div className="w-[85%] h-[5px] opacity-25 bg-white rounded-[30px] ml-1 mt-1"/>)
+                        (<div className="w-[85%] h-[5px] opacity-25 bg-white transition-all rounded-[30px] ml-1 mt-1"/>)
                     }
                 </motion.div>
             </div>
@@ -398,7 +427,7 @@ const PlayInfo: React.FC<{ verset: Verset, isOldError: boolean, hardInfos?: Simp
     const playState = useMemo(() => {
         if (mode == Difficult.CLASSIC) return "Séléctionne le bon verset"
 
-        if (!hardInfos?.bookId) return "Séléctionne le livre"
+        if (!hardInfos?.bookId) return "Séléctionne le bon livre"
         if (hardInfos?.bookId && !hardInfos.chapter) return "Séléctionne le chapitre"
         if (hardInfos?.chapter) return "Séléctionne le(s) verset(s)"
     }, [hardInfos, mode])
@@ -526,8 +555,9 @@ const PlayPlayground: React.FC<{ onSelectVerset: (v: Verset) => void, verses: Ve
 const EndStateScreen: React.FC<{
     variant?: "success" | "error",
     state?: "opened" | "closed",
-    onConfirm: () => void
-}> = ({variant, state, onConfirm}) => {
+    onConfirm: () => void,
+    correctVerset: string
+}> = ({variant, state, onConfirm, correctVerset}) => {
 
     const isError = variant === "error"
     const isOpened = state === "opened"
@@ -549,6 +579,17 @@ const EndStateScreen: React.FC<{
                             {isError ? getRandomErrorMessage() : getRandomEncouragement()}
                         </div>
                     </div>
+                    {isError && <div className={"flex justify-between items-center"}>
+                        <div className={"flex flex-col gap-1"}>
+                            <div
+                                className="text-[#92d233] text-sm font-normal leading-snug"
+                            >
+                                {pickRandom(missedAnswerMessages)}
+                            </div>
+                            <div className="text-white/90 text-base font-bold font-['Feather']">{correctVerset}</div>
+                        </div>
+                        <CheckCircle className={"text-sm text-gray-600"}/>
+                    </div>}
                     <Button
                         variant={isError ? "red" : "green"}
                         className="w-full"

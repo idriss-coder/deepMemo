@@ -2,7 +2,8 @@
 import React, {useCallback, useEffect, useState} from "react";
 import {Verset} from "@/lib/db";
 import {useVerses} from './useVerses';
-import {Difficult} from "@/app/(main)/plaground/home/verses-list/play/page"; // Hook d’exemple fourni
+import {Difficult} from "@/app/(main)/plaground/home/verses-list/play/page";
+import {shuffleArray} from "@/lib/utils"; // Hook d’exemple fourni
 
 export interface QuizItem {
     id: number;               // question index (0-based)
@@ -71,8 +72,10 @@ export function useGameplayArea() {
     useEffect(() => {
         if (!myVerses || myVerses.length === 0) return;
 
-        // ex: on prend 10 versets max (ou tout le tableau, ou un shuffle, etc.)
-        const selected = myVerses.slice(0, 10);
+
+        const shuffledVerses = shuffleArray(myVerses);
+        const selected = shuffledVerses.slice(0, 10);
+
         const newQuiz = selected.map((verse, index) => {
             const options = getRandomOptions(verse, selected);
             return {

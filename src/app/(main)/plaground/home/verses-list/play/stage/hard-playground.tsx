@@ -10,18 +10,27 @@ import {DChevronLeft} from "@/components/customize/icons";
 
 export const HardPlayground: React.FC<{
     onSelect: (v: SimpleBook) => void,
-    selected?: SimpleBook
+    selected?: SimpleBook,
+    verses: Verset[]
 }> = ({
           onSelect,
-          selected
+          selected, verses: propositions,
       }) => {
 
     const [bookID, setBookID] = useState<number>()
     const [chapter, setChapter] = useState<number>()
     const [versets, setVersets] = React.useState<number[] | undefined>()
 
-
     const [step, setStep] = useState(1);
+
+    React.useEffect(() => {
+        if (propositions) {
+            setBookID(undefined)
+            setChapter(undefined)
+            setVersets(undefined)
+            setStep(1)
+        }
+    }, [propositions])
 
     const book = useMemo(() => {
         if (!bookID) return

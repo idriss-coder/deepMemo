@@ -20,6 +20,7 @@ export enum SoundList {
 
   thunder = "/assets/sound/lottie/thunder.mp3",
   flash = "/assets/sound/lottie/flash.mp3",
+  star = "/assets/sound/lottie/star.mp3",
 }
 
 export function cn(...inputs: ClassValue[]) {
@@ -37,6 +38,30 @@ export function normalizeVersetTitle(verset: Verset) {
       verset.verses_num ? ": " + verset.verses_num[0] + (verset.verses_num.length > 1 ? "-" + verset.verses_num[verset.verses_num.length - 1] : "") : ""
   } `
 }
+
+export const missedAnswerMessages = [
+  "La bonne réponse, c’était celle-ci.",
+  "C’est celle-ci qu’il fallait sélectionner.",
+  "Et voilà la solution correcte que tu as manquée.",
+  "Le bon choix était en fait celui-là.",
+  "La réponse exacte était la suivante.",
+  "C’est cette solution qu’il fallait prendre.",
+  "Dommage, c’était celle-là la bonne.",
+  "C’est ici qu’était la bonne option.",
+  "C’est cette réponse qui était juste.",
+  "La bonne réponse, la voici !",
+  "C’est précisément elle qu’il fallait choisir.",
+  "Ce choix était le bon.",
+  "Ça se jouait sur celui-ci.",
+  "Regarde, c’était cette solution la bonne.",
+  "C’est elle, la réponse correcte.",
+  "La solution attendue se trouvait ici.",
+  "Cette option était la bonne.",
+  "C’est cette réponse qu’on attendait.",
+  "On visait exactement celle-ci.",
+  "Voilà, tu aurais dû cocher ça."
+];
+
 
 
 const encouragements = [
@@ -129,6 +154,15 @@ export function pickRandom<T>(d: T[]): T {
   const randomIndex = Math.floor(Math.random() * d.length);
   return d[randomIndex]
 
+}
+
+export function shuffleArray<T>(arr: T[]): T[] {
+  const newArr = [...arr]; // Copie pour éviter de modifier l'original
+  for (let i = newArr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+  }
+  return newArr;
 }
 
 let activeAudios: HTMLAudioElement[] = [];
