@@ -1,4 +1,4 @@
-import React, {useMemo, useState} from "react";
+import React, {useMemo} from "react";
 import {BibleBook, Book, topBooks} from "@/backend/mock/bible-book";
 import {removeAccents} from "@/lib/utils";
 import Fuse from "fuse.js";
