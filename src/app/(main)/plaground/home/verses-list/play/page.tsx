@@ -78,9 +78,21 @@ export default function PlayPage() {
         setDifficult,
     } = useGameplayArea();
 
+    useEffect(() => {
+        return () => {
+            stopAllSounds()
+        }
+    }, [])
+
     const isHard = useMemo(() => {
         return difficult == Difficult.HARD
     }, [difficult])
+
+    useEffect(() => {
+        if (difficult) {
+            localStorage.setItem("difficult", JSON.stringify(difficult))
+        }
+    }, [difficult]);
 
     useEffect(() => {
         const storedDifficult = localStorage.getItem("difficult");
@@ -201,7 +213,6 @@ export default function PlayPage() {
                     isOpen={difficultOpen}
                     onDifficultChange={(d) => {
                         setDifficult(d)
-                        localStorage.setItem("difficult", JSON.stringify(d))
                     }}
                     selected={difficult}
                     onClose={() => {
@@ -309,43 +320,55 @@ export default function PlayPage() {
     }
 }
 
-const PlayProgress: React.FC<{
-    onCloseClick: () => void,
-    progress: number,
-    count: number,
-    withEffect: boolean,
-    acc: number
-}> = ({
-          onCloseClick,
-          progress,
-          count,
-          withEffect,
-          acc
-      }) => {
+interface PlayProgressProps {
+    onCloseClick: () => void;
+    progress: number;
+    count: number;
+    withEffect: boolean;
+    acc: number; // successiveWinCount
+}
 
+const PlayProgress: React.FC<PlayProgressProps> = ({
+                                                       onCloseClick,
+                                                       progress,
+                                                       count,
+                                                       withEffect,
+                                                       acc: successiveWinCount,
+                                                   }) => {
     return (
-        <div className={"relative"}>
-            <div className={"flex items-center gap-[15px] relative"}>
-                <button onClick={() => {
-                    onCloseClick()
-                }}>
+        <div className="relative">
+            <div className="flex items-center gap-[15px] relative">
+                <button onClick={onCloseClick}>
                     <DCloseIcon/>
                 </button>
-                <ProgressBar
-                    withEffect={withEffect}
-                    progress={progress}
-                />
-                <HeartCount
-                    count={count}
-                />
+                <ProgressBar withEffect={withEffect} progress={progress}/>
+                <HeartCount count={count}/>
             </div>
-            {withEffect && <div className={"flex items-center justify-center gap-1 top-1 w-full absolute -bottom-9"}>
-                <DGuardIcon/>
-                <div className="text-center text-[#ffc800] text-xs font-normal">{acc} d’affilés</div>
-            </div>}
+
+            <AnimatePresence mode="popLayout">
+                {withEffect && (
+                    <motion.div
+                        key={successiveWinCount}
+                        className="flex items-center justify-center gap-1 top-1 w-full absolute -bottom-9"
+                        initial={{scale: 0.5, opacity: 0}}
+                        animate={{scale: 1, opacity: 1}}
+                        exit={{scale: 0.5, opacity: 0}}
+                        transition={{
+                            type: "spring",
+                            stiffness: 500,
+                            damping: 15
+                        }}
+                    >
+                        <DGuardIcon/>
+                        <div className="text-center text-[#ffc800] text-xs font-normal">
+                            {successiveWinCount} d’affilés
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
-    )
-}
+    );
+};
 
 interface HeartCountProps {
     count: number

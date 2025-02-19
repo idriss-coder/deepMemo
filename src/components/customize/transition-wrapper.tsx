@@ -12,9 +12,9 @@ export const TransitionWrapper: React.FC<React.HTMLAttributes<HTMLDivElement>> =
         <AnimatePresence mode="wait">
             <motion.div
                 key={pathname}
-                initial={{opacity: 0.6}}
+                initial={{opacity: 1}}
                 animate={{opacity: 1}}
-                exit={{opacity: 0.6}}
+                exit={{opacity: 1}}
                 transition={{duration: 0.2}}
             >
                 {children}

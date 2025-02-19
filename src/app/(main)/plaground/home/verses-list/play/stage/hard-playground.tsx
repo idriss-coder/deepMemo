@@ -1,7 +1,10 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useRef, useState} from "react";
 import {Verset} from "@/lib/db";
 import {AnimatePresence, motion} from "framer-motion";
-import {BookSelectSection} from "@/app/(main)/plaground/home/verses-list/new/_sections/book-select-section";
+import {
+    BookSelectSection,
+    SearchBookComponent
+} from "@/app/(main)/plaground/home/verses-list/new/_sections/book-select-section";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {BibleBook, SimpleBook} from "@/backend/mock/bible-book";
 import {ListGrid} from "@/app/(main)/plaground/home/verses-list/new/infos/_components/list-grid-component";
@@ -17,18 +20,34 @@ export const HardPlayground: React.FC<{
     const [chapter, setChapter] = useState<number>();
     const [versets, setVersets] = useState<number[] | undefined>();
     const [step, setStep] = useState(1);
+    const [searchTem, setSearchTem] = React.useState<string>()
 
-    // Quand 'propositions' change, on réinitialise tout
+    const scrollAreaRef = useRef<HTMLDivElement | null>(null);
+
     useEffect(() => {
         if (propositions) {
             setBookID(undefined);
             setChapter(undefined);
             setVersets(undefined);
             setStep(1);
+
+            if (scrollAreaRef.current) {
+                scrollAreaRef.current.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: "smooth",
+                });
+
+                window.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: "auto", // ou "smooth"
+                });
+            }
         }
     }, [propositions]);
 
-    // On récupère le livre sélectionné
+
     const book = useMemo(() => {
         if (!bookID) return undefined;
         const foundBook = BibleBook.find((b) => b.id === +bookID);
@@ -53,6 +72,7 @@ export const HardPlayground: React.FC<{
         setBookID(book_id);
         onSelect({bookId: book_id});
         setStep(2);
+        setSearchTem(undefined)
     };
 
     // Sélection d'un chapitre → step 3
@@ -109,7 +129,17 @@ export const HardPlayground: React.FC<{
                 </div>
             )}
 
+            {step === 1 && (
+                <div>
+                    <SearchBookComponent
+                        setTem={setSearchTem}
+                        tem={searchTem}
+                    />
+                </div>
+            )
+            }
             <ScrollArea
+                ref={scrollAreaRef}
                 className={
                     "h-[430px] sm:h-[400px] md:h-[400px] lg:h-[400px] xl:h-[400px] 2xl:h-[400px] screen-h-adjust"
                 }
@@ -123,7 +153,10 @@ export const HardPlayground: React.FC<{
                             exit={{opacity: 0, x: 40}}
                             transition={{duration: 0.3}}
                         >
-                            <BookSelectSection cb={onSelectBook}/>
+                            <BookSelectSection
+                                searchValue={searchTem}
+                                cb={onSelectBook}
+                            />
                         </motion.div>
                     )}
 

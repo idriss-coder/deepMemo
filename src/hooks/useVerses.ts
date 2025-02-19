@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {db, Verset} from "@/lib/db";
 
 export const useVerses = () => {
-    const [myVerses, setMyVerses] = useState<Verset[]>([]);
+    const [myVerses, setMyVerses] = useState<Verset[]>();
 
     useEffect(() => {
         const loadVerses = async () => {

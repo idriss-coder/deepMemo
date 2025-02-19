@@ -38,6 +38,7 @@ export const DifficultSelectScreen: React.FC<{
         <TransitionScreen className="bg-bgPrimary z-40 flex items-start pt-6 px-4">
             <div className="flex flex-col items-center justify-center w-full">
                 <BackButton
+                    forwardClose={true}
                     isClose={true}
                     link="/plaground/home/verses-list"
                     mainTitle="Quel niveau souhaite-tu jouer ?"

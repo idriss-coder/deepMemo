@@ -4,12 +4,12 @@ import {DArrowTop, DBook, DHeartGray} from "@/components/customize/icons";
 import {Button} from "@/components/ui/button";
 import {BackButton} from "@/components/customize/utils";
 import Link from "next/link";
-import {useRouter} from "next/navigation";
-import React, {useMemo} from "react";
+import React, {useEffect, useMemo} from "react";
 import {Verset} from "@/lib/db";
 import {Book, bookMapById} from "@/backend/mock/bible-book";
 import {useVerses} from "@/hooks/useVerses";
 import {normalizeVersetTitle} from "@/lib/utils";
+import ButtonLoader from "@/components/customize/buttonLoader";
 
 export default function VersetListPage() {
     const {myVerses} = useVerses()
@@ -18,19 +18,40 @@ export default function VersetListPage() {
         <div>
             <HeroSection verses={myVerses}/>
             <div className={"px-[20px] mt-[20px] flex flex-col gap-3"}>
-                <NavSection versetCount={myVerses.length}/>
+                <NavSection
+                    versetCount={myVerses ? myVerses.length : 0}
+                />
                 <NewVerset/>
-                {myVerses.length < 5 && <EmptyVerses verses={myVerses}/>}
-                <VersetListView verses={myVerses}/>
+                {(!myVerses) && (
+                    <VersesListSkeleton/>
+                )}
+                {(myVerses && myVerses.length < 5) &&
+                    <EmptyVerses
+                        verses={myVerses}
+                    />
+                }
+                <VersetListView
+                    verses={myVerses}
+                />
             </div>
         </div>
     )
 }
 
-const VersetListView: React.FC<{ verses: Verset[] }> = ({verses}) => {
+const VersesListSkeleton: React.FC = () => {
     return (
         <div className={"flex flex-col gap-3"}>
-            {verses.map(v => (
+            {Array.from({length: 5}).map((d, i) => (
+                <div key={i} className={"w-full h-[50px] bg-bgPrimarySecondary rounded-md animate-pulse"}></div>
+            ))}
+        </div>
+    )
+}
+
+const VersetListView: React.FC<{ verses?: Verset[] }> = ({verses}) => {
+    return (
+        <div className={"flex flex-col gap-3"}>
+            {verses && verses.map(v => (
                 <VersetItem
                     verset={v}
                     key={v.id}
@@ -40,9 +61,20 @@ const VersetListView: React.FC<{ verses: Verset[] }> = ({verses}) => {
     )
 }
 
-const HeroSection: React.FC<{ verses: Verset[] }> = ({verses}) => {
+const HeroSection: React.FC<{ verses?: Verset[] }> = ({verses}) => {
 
-    const $router = useRouter()
+    const [loading, setLoading] = React.useState(false)
+
+    useEffect(() => {
+
+        return () => {
+            setLoading(false)
+        }
+    }, [])
+
+    const canPlay = useMemo(() => {
+        return verses && verses.length >= 5
+    }, [verses])
 
     return (
         <div
@@ -59,16 +91,27 @@ const HeroSection: React.FC<{ verses: Verset[] }> = ({verses}) => {
                     memoriser les versets par coeur.
                 </div>
 
-                <Button
-                    variant={verses.length >= 5 ? "purple" : "disabled"}
-                    disabled={!(verses.length >= 5)}
+                <Link
                     className={"w-full"}
-                    onClick={() => {
-                        $router.push("/plaground/home/verses-list/play");
+                    onClick={e => {
+                        if (!canPlay) e.preventDefault()
                     }}
+                    href={"/plaground/home/verses-list/play"}
                 >
-                    DEMARRER L’ENTRAINEMENT
-                </Button>
+                    <Button
+                        onClick={() => setLoading(true)}
+                        variant={canPlay ? "purple" : "disabled"}
+                        disabled={!canPlay}
+                        className={"w-full"}
+                    >
+
+                        {loading
+                            ? <ButtonLoader/>
+                            : <span>DEMARRER L’ENTRAINEMENT</span>
+                        }
+                    </Button>
+                </Link>
+
             </div>
         </div>
     )
@@ -146,25 +189,23 @@ const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 
     const versetTitle = useMemo(() => normalizeVersetTitle(verset), [verset])
 
-    const $router = useRouter()
-
     const book = bookMapById.get(verset.book_num) as Book
 
+    const link = `/plaground/home/verses-list/new/infos?book_id=${verset.book_num}&verset_id=${verset.id}`
 
     return (
         <div>
-            <Button
-                variant={"neutral"}
-                className={"w-full flex justify-between border-[#38454e]"}
-                onClick={() => {
-                    $router.push((`/plaground/home/verses-list/new/infos?book_id=${verset.book_num}&verset_id=${verset.id}`))
-                }}
-            >
-                <div>{book.label} {versetTitle}</div>
-                <div className={"text-5xl"}>
-                    <DHeartGray className={"scale-[2]"}/>
-                </div>
-            </Button>
+            <Link href={link}>
+                <Button
+                    variant={"neutral"}
+                    className={"w-full flex justify-between border-[#38454e]"}
+                >
+                    <div>{book.label} {versetTitle}</div>
+                    <div className={"text-5xl"}>
+                        <DHeartGray className={"scale-[2]"}/>
+                    </div>
+                </Button>
+            </Link>
         </div>
     )
 }

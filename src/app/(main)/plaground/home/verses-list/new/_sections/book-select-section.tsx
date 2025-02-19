@@ -8,9 +8,13 @@ import {DArrowGoIcon, DHeartGray} from "@/components/customize/icons";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 
-export const BookSelectSection: React.FC<{ cb?: BookCallBack }> = ({cb}) => {
+export const BookSelectSection: React.FC<{
+    cb?: BookCallBack,
+    searchValue?: string,
+    setSearchValue?: (value: string) => string
+}> = ({cb, searchValue}
+) => {
 
-    const [searchTerm, setSearchTerm] = useState("");
 
     const fuse = useMemo(() => {
         const options = {
@@ -22,15 +26,17 @@ export const BookSelectSection: React.FC<{ cb?: BookCallBack }> = ({cb}) => {
 
         const BibleBookNormalized = BibleBook.map(book => ({
             ...book,
-            labelNormalized: removeAccents(book.label),
+            labelNormalized: removeAccents(book.label).replace(/\s+/g, ""),
         }));
 
         return new Fuse(BibleBookNormalized, options);
     }, []);
 
     const searchResult = useMemo(() => {
-        const trimmed = searchTerm.trim().toLowerCase()
-        const queryNormalized = removeAccents(trimmed)
+        if (!searchValue) return topBooks
+
+        const trimmed = searchValue.trim().toLowerCase()
+        const queryNormalized = removeAccents(trimmed).replace(/\s+/g, "")
 
         if (!trimmed) {
             return topBooks
@@ -38,22 +44,30 @@ export const BookSelectSection: React.FC<{ cb?: BookCallBack }> = ({cb}) => {
         const fuseResults = fuse.search(queryNormalized)
 
         return fuseResults.map((result) => result.item)
-    }, [searchTerm, fuse])
+    }, [searchValue, fuse])
 
     return (
         <div className={"flex flex-col gap-[28px]"}>
-            <Input
-                id={"search"}
-                type={"text"}
-                placeholder={"Rechercher un livre"}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                value={searchTerm}
-            />
             <SearchSuggestion
                 books={searchResult}
                 cb={cb}
             />
         </div>
+    )
+}
+
+export const SearchBookComponent: React.FC<{ tem: string | undefined, setTem: (v: string) => void }> = ({
+                                                                                                            tem,
+                                                                                                            setTem
+                                                                                                        }) => {
+    return (
+        <Input
+            id={"search"}
+            type={"text"}
+            placeholder={"Rechercher un livre"}
+            onChange={(e) => setTem(e.target.value)}
+            value={tem}
+        />
     )
 }
 
