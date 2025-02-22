@@ -3,7 +3,7 @@
 import {DBook, DCloseIcon, DSettingsIcon} from "@/components/customize/icons";
 import {cn, maskFirstTwo} from "@/lib/utils";
 import Link from "next/link";
-import React from "react";
+import React, {useState} from "react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
 import {SoundThemRegulator} from "@/app/plaground/home/_components/sound";
@@ -36,8 +36,12 @@ export default function HomPage() {
 }
 
 const TrainingItem = () => {
+
+    const [load, setLoad] = useState(false)
+
     return (
         <button
+            onClick={() => setLoad(true)}
             className={cn(
                 "w-full h-[79px] pl-[30px] bg-[#141f25] rounded-[15px] border-l-2 border-r-2 border-t-2 border-b-4 border-[#38454e] justify-between items-center inline-flex overflow-hidden",
                 "hover:border-b-[5px]",
@@ -46,7 +50,8 @@ const TrainingItem = () => {
                 "transition"
             )}
         >
-            <div className="text-white/90 text-base font-bold font-['Feather']">Versets bibliques</div>
+            <div
+                className="text-white/90 text-base font-bold font-['Feather']">{load ? "Un instant..." : "Versets bibliques"}</div>
             <DBook/>
         </button>
     )
