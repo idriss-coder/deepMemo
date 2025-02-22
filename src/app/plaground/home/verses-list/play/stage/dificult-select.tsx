@@ -1,7 +1,7 @@
 "use client"
 
 import React, {useMemo} from "react";
-import {TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
+import {TransitionScreen} from "@/app/plaground/home/verses-list/play/components/closeConfirm";
 import {BackButton} from "@/components/customize/utils";
 import {Button} from "@/components/ui/button";
 import {DBookIcon, HardLevelIcon, LowLevelIcon} from "@/components/customize/icons";

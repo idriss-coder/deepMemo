@@ -5,7 +5,7 @@ import React from "react";
 import {
     BookSelectSection,
     SearchBookComponent
-} from "@/app/(main)/plaground/home/verses-list/new/_sections/book-select-section";
+} from "@/app/plaground/home/verses-list/new/_sections/book-select-section";
 
 export default function AddVersetPage() {
     const [term, setTerm] = React.useState<string>()

@@ -11,7 +11,7 @@ import {db, Verset} from "@/lib/db";
 import {
     DeleteVersetConfirmScreen,
     ListGrid
-} from "@/app/(main)/plaground/home/verses-list/new/infos/_components/list-grid-component";
+} from "@/app/plaground/home/verses-list/new/infos/_components/list-grid-component";
 import VersetService from "@/service/VersetServie";
 import {useGetProfile} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";

@@ -6,7 +6,7 @@ import Link from "next/link";
 import React from "react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
-import {SoundThemRegulator} from "@/app/(main)/plaground/home/_components/sound";
+import {SoundThemRegulator} from "@/app/plaground/home/_components/sound";
 import {AnimatePresence, motion} from "framer-motion";
 import {getBgColorFromLetter} from "@/components/customize/utils";
 import {useGetLocalUser, useSignOut} from "@/hooks/_screens/useAuth";

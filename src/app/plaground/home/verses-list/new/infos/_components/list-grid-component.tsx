@@ -1,6 +1,6 @@
 import React from "react";
 import {cn, playSound} from "@/lib/utils";
-import {CloseConfirm} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
+import {CloseConfirm} from "@/app/plaground/home/verses-list/play/components/closeConfirm";
 import {Trash2Icon} from "lucide-react";
 
 interface ListGridProps {

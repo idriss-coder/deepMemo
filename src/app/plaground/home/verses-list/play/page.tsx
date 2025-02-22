@@ -26,7 +26,7 @@ import {
     stopAllSounds
 } from "@/lib/utils";
 import {useRouter} from "next/navigation";
-import {CloseConfirm, TransitionScreen} from "@/app/(main)/plaground/home/verses-list/play/components/closeConfirm";
+import {CloseConfirm, TransitionScreen} from "@/app/plaground/home/verses-list/play/components/closeConfirm";
 import {useGameplayArea} from "@/hooks/useGameplay";
 import {Verset} from "@/lib/db";
 import {bookMapById, SimpleBook} from "@/backend/mock/bible-book";
@@ -34,8 +34,8 @@ import {Heart, LoaderIcon} from "lucide-react";
 import dynamic from 'next/dynamic'
 import flashLotie from "@/effect/flash.json"
 import starLotie from "@/effect/star.json"
-import {DifficultSelectScreen} from "@/app/(main)/plaground/home/verses-list/play/stage/dificult-select";
-import {HardPlayground} from "@/app/(main)/plaground/home/verses-list/play/stage/hard-playground";
+import {DifficultSelectScreen} from "@/app/plaground/home/verses-list/play/stage/dificult-select";
+import {HardPlayground} from "@/app/plaground/home/verses-list/play/stage/hard-playground";
 import accEnabled from "@/effect/acc-enabled.json";
 
 const Lottie = dynamic(
@@ -652,9 +652,9 @@ const EndStateScreen: React.FC<{
 
 
 const ClosePartyScreen: React.FC<{ state: "closed" | "opened", onCloseCancel: () => void }> = ({
-                                                                                                    state,
-                                                                                                    onCloseCancel
-                                                                                                }) => {
+                                                                                                   state,
+                                                                                                   onCloseCancel
+                                                                                               }) => {
 
     const $router = useRouter()
 

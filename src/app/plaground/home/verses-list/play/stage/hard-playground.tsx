@@ -4,10 +4,10 @@ import {AnimatePresence, motion} from "framer-motion";
 import {
     BookSelectSection,
     SearchBookComponent
-} from "@/app/(main)/plaground/home/verses-list/new/_sections/book-select-section";
+} from "@/app/plaground/home/verses-list/new/_sections/book-select-section";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {BibleBook, SimpleBook} from "@/backend/mock/bible-book";
-import {ListGrid} from "@/app/(main)/plaground/home/verses-list/new/infos/_components/list-grid-component";
+import {ListGrid} from "@/app/plaground/home/verses-list/new/infos/_components/list-grid-component";
 import {normalizeVersetTitle} from "@/lib/utils";
 import {DChevronLeft} from "@/components/customize/icons";
 
