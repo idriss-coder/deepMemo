@@ -2,9 +2,9 @@ import type {MetadataRoute} from 'next'
 
 export default function manifest(): MetadataRoute.Manifest {
     return {
-        name: 'Next.js App',
-        short_name: 'Next.js App',
-        description: 'Next.js App',
+        name: 'DeepMemo - Entraîne-toi à memoriser les versets par coeur',
+        short_name: 'DeepMemo',
+        description: 'Entraîne-toi à memoriser les versets par coeur',
         start_url: '/',
         display: 'standalone',
         background_color: '#141F25',

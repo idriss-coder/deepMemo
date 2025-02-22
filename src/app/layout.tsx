@@ -5,10 +5,10 @@ import {TransitionWrapper} from "@/components/customize/transition-wrapper";
 import {Toaster} from "@/components/ui/sonner"
 
 
-const APP_NAME = "PWA App";
-const APP_DEFAULT_TITLE = "My Awesome PWA App";
-const APP_TITLE_TEMPLATE = "%s - PWA App";
-const APP_DESCRIPTION = "Best PWA app in the world!";
+const APP_NAME = "DeepMemo";
+const APP_DEFAULT_TITLE = "Entraîne-toi à memoriser les versets par coeur";
+const APP_TITLE_TEMPLATE = "%s - DeepMemo";
+const APP_DESCRIPTION = "Entraîne-toi à memoriser les versets par coeur";
 
 export const metadata: Metadata = {
     applicationName: APP_NAME,
