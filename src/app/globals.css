@@ -142,3 +142,12 @@ body {
   /* Couleur du thumb, puis couleur du track */
   scrollbar-color: transparent transparent;
 }
+/*---break---*/
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

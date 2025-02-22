@@ -194,3 +194,27 @@ export const playSound = ({path, replay = false, sound = 0.2}: { path: string, r
   });
   activeAudios.push(audio);
 }
+
+export function validateEmail(email: string) {
+  // Expression régulière pour un email "classique"
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email.toLowerCase());
+}
+
+export const isOnline = () => {
+  return navigator.onLine;
+};
+
+
+export function maskFirstTwo(input?: string): string {
+  if (!input) return "";
+  if (input.length <= 2) {
+    return input;
+  }
+
+  const visiblePart = input.slice(0, 2);
+
+  const hiddenPart = "*".repeat(input.length - 2);
+
+  return visiblePart + hiddenPart;
+}

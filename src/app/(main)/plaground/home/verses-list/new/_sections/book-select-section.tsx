@@ -102,12 +102,14 @@ const SuggestionItem: React.FC<{ book: Book, cb?: BookCallBack }> = ({book, cb})
 
     const $router = useRouter();
     const uri = `/plaground/home/verses-list/new/infos?book_id=${book.id}`
+    const [load, setLod] = React.useState(false)
 
     const onNavigate = () => {
         if (cb) {
             cb(book.id)
             return
         }
+        setLod(true)
         $router.push(uri)
     }
 
@@ -133,14 +135,17 @@ const SuggestionItem: React.FC<{ book: Book, cb?: BookCallBack }> = ({book, cb})
             >
                 <DArrowGoIcon className={"scale-150"}/>
             </Button> : (
-                <Link href={uri}>
+                <Link
+                    onClick={() => setLod(true)}
+                    href={uri}
+                >
                     <Button
                         withSound={!!cb}
                         soundMode={2}
                         size={"sm"}
                         onClick={onNavigate}
                     >
-                        <DArrowGoIcon className={"scale-150"}/>
+                        {load ? "..." : <DArrowGoIcon className={"scale-150"}/>}
                     </Button>
                 </Link>
             )}

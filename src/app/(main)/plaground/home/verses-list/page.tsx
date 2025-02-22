@@ -141,10 +141,17 @@ const VersetCount: React.FC<{ count: number }> = ({count}) => {
 
 const NewVerset = () => {
 
+    const [load, setLoad] = React.useState(false)
+    
     return (
         <div>
-            <Link href={"/plaground/home/verses-list/new"}>
-                <Button variant={"dashed"} className={"w-full"}>Nouveau verset.</Button>
+            <Link
+                onClick={() => {
+                    setLoad(true)
+                }}
+                href={"/plaground/home/verses-list/new"}
+            >
+                <Button variant={"dashed"} className={"w-full"}>{load ? "un instant..." : "Nouveau verset."}</Button>
             </Link>
         </div>
     )

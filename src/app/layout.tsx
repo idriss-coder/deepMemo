@@ -2,6 +2,8 @@ import type {Metadata, Viewport} from "next";
 import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import {TransitionWrapper} from "@/components/customize/transition-wrapper";
+import {Toaster} from "@/components/ui/sonner"
+
 
 const APP_NAME = "PWA App";
 const APP_DEFAULT_TITLE = "My Awesome PWA App";
@@ -74,6 +76,7 @@ export default function RootLayout({
       <TransitionWrapper>
           {children}
       </TransitionWrapper>
+      <Toaster/>
       </body>
       </html>
   );

@@ -12,7 +12,11 @@ export default function AddVersetPage() {
 
     return (
         <div className={"px-[20px] flex flex-col gap-[28px] pb-8"}>
-            <BackButton isClose={true} link={"/plaground/home/verses-list"} mainTitle={"Nouveau verset"}/>
+            <BackButton
+                isClose={true}
+                link={"/plaground/home/verses-list"}
+                mainTitle={"Nouveau verset"}
+            />
             <SearchBookComponent
                 setTem={setTerm}
                 tem={term}

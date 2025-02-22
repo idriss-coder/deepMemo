@@ -101,7 +101,7 @@ export const DeleteVersetConfirmScreen: React.FC<{
             icon={<Trash2Icon height={70} width={70}/>}
             title={"Tu veux vraiment supprimer ce verset ?"}
             subTitle={` Apres la supression tu ne pouras plus faire marche arriere.`}
-            cancelText={"Non, ne pas suprimer"}
+            cancelText={"Non, ne pas supprimer"}
             performText={"Supprimer"}
             performAction={() => {
                 onDeleteConfirm()

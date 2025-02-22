@@ -7,11 +7,16 @@ import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {useRouter, useSearchParams} from "next/navigation";
 import {BibleBook} from "@/backend/mock/bible-book";
-import {db} from "@/lib/db";
+import {db, Verset} from "@/lib/db";
 import {
     DeleteVersetConfirmScreen,
     ListGrid
 } from "@/app/(main)/plaground/home/verses-list/new/infos/_components/list-grid-component";
+import VersetService from "@/service/VersetServie";
+import {useGetProfile} from "@/hooks/_screens/useAuth";
+import {toast} from "sonner";
+
+const versetService = new VersetService()
 
 export default function VersetInfos() {
     const [curStep, setCurStep] = React.useState<number>(1)
@@ -20,8 +25,10 @@ export default function VersetInfos() {
     const [mockedDescription, setMockedDescription] = React.useState<string>()
     const [description, setDescription] = React.useState<string | undefined>()
     const [requestDelete, setRequestDelete] = React.useState(false)
+    const [loading, setLoading] = React.useState(false)
 
     const $q = useSearchParams()
+    const {profile} = useGetProfile()
     const $router = useRouter()
     const book_id = $q.get("book_id")
     const verset_id = $q.get("verset_id")
@@ -63,7 +70,7 @@ export default function VersetInfos() {
                 clearTimeout(timer)
             }, 200)
         }
-    }, [chapter])
+    }, [chapter, isUpdate])
 
 
     const versetTitle = useMemo(() => {
@@ -74,13 +81,21 @@ export default function VersetInfos() {
 
     const handleDeleteVerset = async () => {
         if (!verset_id) return
-        await db.verses.delete(+verset_id)
+        const toastId = toast.loading("Supression en cour...")
+        await versetService.deleteVerset(verset_id)
+        toast.dismiss(toastId)
+        toast.success("Verset supprimé...")
         $router.push("/plaground/home/verses-list")
     }
 
     const handleUpdateVerset = async () => {
         if (!verset_id) return
-        await db.verses.update(+verset_id, {content: description})
+        if (description) {
+            const toastId = toast.loading("MAJ en cours...");
+            await versetService.updateVerset(verset_id, description)
+            toast.dismiss(toastId)
+            toast.success("Verset MAJ")
+        }
         $router.push("/plaground/home/verses-list")
     }
 
@@ -91,13 +106,23 @@ export default function VersetInfos() {
         if (!versets) return
         if (!description) return
 
-        await db.verses.add({
+        console.log(profile)
+
+        const _verset: Verset = {
+            user_id: profile?.user_id,
             book_num: +book_id,
             chapter_num: chapter,
             verses_num: versets,
             content: description,
             createdAt: new Date(),
-        });
+        }
+
+        setLoading(true)
+        const toadtId = toast.loading("Ajout en cour...")
+        await versetService.addVerset(_verset)
+        toast.dismiss(toadtId)
+        toast.success("Verset ajouté")
+        setLoading(false)
 
         setChapter(undefined)
         setVersets(undefined)
@@ -196,7 +221,13 @@ export default function VersetInfos() {
                             disabled={isUpdate ? (description == mockedDescription) || !description : (!description)}
                             onClick={isUpdate ? handleUpdateVerset : handleAddVerset}
                         >
-                            {isUpdate ? "Mettre à jour le verset" : "Ajouter le verset"}
+                            {loading ? (
+                                    <span>Ajout en cour...</span>
+                                ) :
+                                (<>
+                                    {isUpdate ? "Mettre à jour le verset" : "Ajouter le verset"}
+                                </>)
+                            }
                         </Button>
                         {isUpdate && <Button
                             variant={"textRed"}
