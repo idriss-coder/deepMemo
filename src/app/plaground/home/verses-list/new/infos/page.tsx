@@ -2,7 +2,7 @@
 
 import {BackButton} from "@/components/customize/utils";
 import {AnimatePresence, motion} from "framer-motion"
-import React, {Suspense, useEffect, useMemo} from "react";
+import React, {Suspense, useEffect, useMemo, useState} from "react";
 import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {useRouter, useSearchParams} from "next/navigation";
@@ -15,6 +15,9 @@ import {
 import VersetService from "@/service/VersetServie";
 import {useGetProfile} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
+import {cn, removeNumberAtStart, startsWithNumber} from "@/lib/utils";
+import Image from "next/image";
+import {DArrowGoIcon} from "@/components/customize/icons";
 
 const versetService = new VersetService()
 
@@ -26,6 +29,7 @@ export default function VersetInfos() {
     const [description, setDescription] = React.useState<string | undefined>()
     const [requestDelete, setRequestDelete] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
+    const [clipboardContent, setClipboardContent] = useState<string>('');
 
     const $q = useSearchParams()
     const {profile} = useGetProfile()
@@ -72,6 +76,39 @@ export default function VersetInfos() {
         }
     }, [chapter, isUpdate])
 
+    const readClipboard = async () => {
+        try {
+            if (!document.hasFocus()) {
+                return;
+            }
+            const text = await navigator.clipboard.readText();
+
+            const isBibleVerset = startsWithNumber(text)
+
+            if (isBibleVerset) {
+                setClipboardContent(removeNumberAtStart(text))
+            }
+
+        } catch (error) {
+            console.error('Erreur lors de la lecture du presse-papier :', error);
+        }
+    };
+
+    useEffect(() => {
+        const handleFocus = () => {
+            void readClipboard();
+        };
+
+        window.addEventListener('focus', handleFocus);
+
+        return () => {
+            window.removeEventListener('focus', handleFocus);
+        };
+    }, []);
+
+    const clipboardApplied = useMemo(() => {
+        return clipboardContent == description
+    }, [clipboardContent, description])
 
     const versetTitle = useMemo(() => {
         return `${book?.label} ${chapter ? chapter + "" : ""} ${
@@ -149,6 +186,18 @@ export default function VersetInfos() {
         )
     }
 
+    const onDescriptionChange = (description: string) => {
+        const cleanedText = removeNumberAtStart(description)
+
+        const descriptionStartsWithNumber = startsWithNumber(description)
+
+        if (descriptionStartsWithNumber) {
+            toast.info("Le numéro du verset a été automatiquement retiré ✂️");
+        }
+
+        setDescription(cleanedText);
+    }
+
     return (
         <Suspense>
             <div className="px-[20px] flex flex-col gap-[28px]">
@@ -192,13 +241,35 @@ export default function VersetInfos() {
                     {curStep === 3 && (
                         <motion.div key="step3" {...fadeInUp} className="flex flex-col gap-6">
                             <h2 className="text-2xl font-bold font-['Feather']">De quoi parle {versetTitle} ?</h2>
+                            {<div
+                                className={cn(
+                                    "h-[57px] relative gap-[14px] bg-[#38454e]/20 rounded-[5px] border-[#38454e] overflow-hidden transition items-center justify-between p-[14px]",
+                                    !clipboardApplied && clipboardContent ? "flex" : "hidden"
+                                )}>
+                                <ClipboardStatus/>
+                                <div
+                                    className="text-[#808990] text-sm font-normal  leading-snug line-clamp-2">
+                                    {clipboardContent}
+                                </div>
+                                <button
+                                    className={"animate-pulse"}
+                                    onClick={() => setDescription(clipboardContent)}
+                                >
+                                    <DArrowGoIcon color={"#4abef7"} className={"text-[#4abef7]"}/>
+                                </button>
+                            </div>}
                             <div className="flex flex-col gap-4">
-                                <Textarea
-                                    rows={6}
-                                    value={description}
-                                    onChange={e => setDescription(e.currentTarget.value)}
-                                    autoFocus={true}
-                                />
+                                <div className={"relative"}>
+                                    <Textarea
+                                        rows={6}
+                                        value={description}
+                                        onChange={e => onDescriptionChange(e.currentTarget.value)}
+                                        autoFocus={true}
+                                    />
+                                    <div className={"absolute bottom-6 right-4"}>
+                                        {clipboardApplied && <ClipboardStatus/>}
+                                    </div>
+                                </div>
                                 <div className="text-[#4e5b64] text-sm font-normal leading-snug">
                                     Vous n’êtes pas obligé d’inclure tout le verset : un simple aperçu suffit pour vous
                                     en rappeler rapidement.
@@ -248,3 +319,15 @@ export default function VersetInfos() {
     )
 }
 
+
+const ClipboardStatus = () => {
+    return (
+        <Image
+            src={"/assets/uix/info.png"}
+            alt={"info ico"}
+            width={50}
+            height={50}
+            className={"size-[25px] animate-in"}
+        />
+    )
+}

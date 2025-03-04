@@ -218,3 +218,19 @@ export function maskFirstTwo(input?: string): string {
 
   return visiblePart + hiddenPart;
 }
+
+export function removeNumberAtStart(text: string): string {
+  // On utilise ici une expression régulière :
+  // ^\d+\s* signifie :
+  //  - ^ : début de la chaîne
+  //  - \d+ : un ou plusieurs chiffres
+  //  - \s* : zéro ou plusieurs espaces
+  return text.replace(/^\d+\s*/, '');
+}
+
+export function startsWithNumber(text: string): boolean {
+  // On utilise une expression régulière pour tester la présence d'un nombre au début
+  // ^ : début de la chaîne
+  // \d+ : un ou plusieurs chiffres
+  return /^\d+/.test(text);
+}

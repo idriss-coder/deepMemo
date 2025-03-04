@@ -2,7 +2,7 @@
 
 import {DArrowTop, DBook, DHeartGray} from "@/components/customize/icons";
 import {Button} from "@/components/ui/button";
-import {BackButton} from "@/components/customize/utils";
+import {BackButton, SpinnerLoader} from "@/components/customize/utils";
 import Link from "next/link";
 import React, {useEffect, useMemo} from "react";
 import {Verset} from "@/lib/db";
@@ -194,6 +194,7 @@ const EmptyVerses: React.FC<EmptyVersesProps> = ({verses}) => {
 
 const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 
+    const [loading, setLoading] = React.useState(false)
     const versetTitle = useMemo(() => normalizeVersetTitle(verset), [verset])
 
     const book = bookMapById.get(verset.book_num) as Book
@@ -202,14 +203,24 @@ const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 
     return (
         <div>
-            <Link href={link}>
+            <Link
+                href={link}
+                onClick={() => {
+                    setLoading(true)
+                }}
+            >
                 <Button
                     variant={"neutral"}
                     className={"w-full flex justify-between border-[#38454e]"}
                 >
-                    <div>{book.label} {versetTitle}</div>
+                    <div className={"flex items-center gap-4"}>
+                        <div>{book.label} {versetTitle} {" "} </div>
+                    </div>
                     <div className={"text-5xl"}>
-                        <DHeartGray className={"scale-[2]"}/>
+                        {loading
+                            ? <SpinnerLoader/>
+                            : <DHeartGray className={"scale-[2]"}/>
+                        }
                     </div>
                 </Button>
             </Link>

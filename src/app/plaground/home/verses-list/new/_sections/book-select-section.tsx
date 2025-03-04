@@ -145,7 +145,12 @@ const SuggestionItem: React.FC<{ book: Book, cb?: BookCallBack }> = ({book, cb})
                         size={"sm"}
                         onClick={onNavigate}
                     >
-                        {load ? "..." : <DArrowGoIcon className={"scale-150"}/>}
+                        {load
+                            ? "..."
+                            : <DArrowGoIcon
+                                className={"scale-150"}
+                            />
+                        }
                     </Button>
                 </Link>
             )}

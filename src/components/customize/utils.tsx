@@ -87,3 +87,19 @@ export function getBgColorFromLetter(value?: string) {
     // Couleur par défaut si la lettre n’est pas gérée
     return "#ffab33";
 }
+
+export const DotsLoader = () => {
+    return (
+        <div className="flex space-x-2">
+            <div className="h-3 w-3 animate-pulse rounded-full bg-lPrimary"></div>
+            <div className="h-3 w-3 animate-pulse rounded-full bg-lPrimary delay-150"></div>
+            <div className="h-3 w-3 animate-pulse rounded-full bg-lPrimary delay-300"></div>
+        </div>
+    )
+}
+
+export const SpinnerLoader = () => {
+    return (
+        <div className="size-6 animate-spin rounded-full border-4 border-bgPrimarySecondary border-t-lPrimary"></div>
+    )
+}

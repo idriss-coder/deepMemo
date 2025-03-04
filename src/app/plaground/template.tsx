@@ -5,6 +5,7 @@ import VersetService from "@/service/VersetServie";
 import UserService from "@/service/UserService";
 import {isOnline} from "@/lib/utils";
 import {useFetchRemoteVerses} from "@/hooks/useVerses";
+import {usePathname} from "next/navigation";
 
 
 const versetService = new VersetService()
@@ -14,6 +15,7 @@ const userService = new UserService()
 const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
     const {loading, handlerFetch} = useFetchRemoteVerses()
+    const $path = usePathname()
 
     useEffect(() => {
         function handleOnline() {
@@ -23,6 +25,12 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
         }
 
         if (isOnline()) {
+            const pathsToStartSync = ["/plaground/home", "/plaground/home/verses-list"]
+
+            if (!pathsToStartSync.includes($path)) {
+                return
+            }
+
             void handlerFetch()
             void userService.requestProfile()
         }
