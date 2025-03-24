@@ -35,17 +35,16 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
             void handleOnline()
         }
 
-        const timer = setTimeout(async () => {
-            await versetService.syncWithServer();
-            void handleOnline()
-            clearTimeout(timer);
-        }, 2000)
+        // const timer = setTimeout(async () => {
+        //     void handleOnline()
+        //     clearTimeout(timer);
+        // }, 2000)
 
         window.addEventListener('online', handleOnline);
         return () => {
-            clearTimeout(timer)
+            // clearTimeout(timer)
             window.removeEventListener('online', handleOnline);
-        };
+        }
     }, [])
 
 
