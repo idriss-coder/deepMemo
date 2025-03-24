@@ -18,9 +18,9 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const $path = usePathname()
 
     useEffect(() => {
-        function handleOnline() {
+        async function handleOnline() {
             console.log("Le navigateur est en ligne, on tente de synchroniser...");
-            void versetService.syncWithServer();
+            await versetService.syncWithServer();
             void handlerFetch()
         }
 
@@ -31,14 +31,15 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
             //     return
             // }
 
-            void handlerFetch()
             void userService.requestProfile()
+            void handleOnline()
         }
 
         const timer = setTimeout(async () => {
             await versetService.syncWithServer();
+            void handleOnline()
             clearTimeout(timer);
-        }, 5000)
+        }, 2000)
 
         window.addEventListener('online', handleOnline);
         return () => {
