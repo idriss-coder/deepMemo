@@ -27,9 +27,9 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
         if (isOnline()) {
             const pathsToStartSync = ["/plaground/home", "/plaground/home/verses-list"]
 
-            if (!pathsToStartSync.includes($path)) {
-                return
-            }
+            // if (!pathsToStartSync.includes($path)) {
+            //     return
+            // }
 
             void handlerFetch()
             void userService.requestProfile()
