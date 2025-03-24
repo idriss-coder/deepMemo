@@ -33,19 +33,20 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
             void handlerFetch()
             void userService.requestProfile()
+            void versetService.syncWithServer();
         }
 
         const timer = setTimeout(async () => {
             await versetService.syncWithServer();
             clearTimeout(timer);
-        }, 5000)
+        }, 2000)
 
         window.addEventListener('online', handleOnline);
         return () => {
             clearTimeout(timer)
             window.removeEventListener('online', handleOnline);
         };
-    }, [])
+    }, [handlerFetch])
 
 
     return (
