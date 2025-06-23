@@ -107,7 +107,7 @@ const HeroSection: React.FC<{ verses?: Verset[] }> = ({verses}) => {
 
                         {loading
                             ? <ButtonLoader/>
-                            : <span className={"capitalize"}>Démarrer l'entraînement</span>
+                            : <span className={"uppercase"}>Démarrer l'entraînement</span>
                         }
                     </Button>
                 </Link>
