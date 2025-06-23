@@ -27,7 +27,7 @@ export default function LoginPage() {
 
     return (
         <div className={"flex flex-col gap-[26px]"}>
-            <h1 className="text-white/20 text-lg  font-['Feather'] text-center">Connexion</h1>
+            <h1 className="text-white/20 text-lg  font-['Feather'] text-center">Se connecter à DeepMemo</h1>
             <div className={"flex flex-col gap-[10px]"}>
                 <Input
                     placeholder={"Adresse email"}

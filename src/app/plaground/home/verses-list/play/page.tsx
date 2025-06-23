@@ -207,7 +207,7 @@ export default function PlayPage() {
 
     if (currentQuestion) {
         return (
-            <div className={"px-[20px] py-[20px] flex flex-col gap-[30px] relative"}>
+            <div className={"px-[20px] py-[20px] flex flex-col gap-[30px] relative mb-32"}>
 
                 <DifficultSelectScreen
                     isOpen={difficultOpen}

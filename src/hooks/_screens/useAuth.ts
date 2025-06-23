@@ -60,9 +60,9 @@ export const useRegister = () => {
             return;
         }
 
+        const toastID = toast.loading("Création du compte en cours...");
         try {
             setWaiting(true)
-            toast("Création du compte en cours...");
             const _user: Partial<IUser> = {
                 email,
                 pseudo,
@@ -94,11 +94,18 @@ export const useRegister = () => {
                 }
                 //*******************************************
 
+                const timer = setTimeout(() => {
+                    clearTimeout(timer)
+                    toast.dismiss(toastId)
+                }, [3000])
+
                 setWaiting(false)
                 $router.replace("/plaground/use-term")
             }
+            toast.dismiss(toastID);
         } catch (err: any) {
             setWaiting(false)
+            toast.dismiss(toastID)
             // Gérer l’erreur côté service (ex: email déjà utilisé, etc.)
             toast.error(err.message || "Erreur lors de l'inscription");
         }
@@ -136,12 +143,13 @@ export const useLogin = () => {
         }
 
         setWaiting(true);
-        toast("Connexion en cours...");
+        const loadingID = toast.loading("Connexion en cours...");
 
         const result = <LoginResponse>await userService.login({email, password})
 
         if (!result.success) {
             toast.error(result.message || "Erreur lors de l'authentification.")
+            toast.dismiss(loadingID);
             setWaiting(false);
             return
         }
@@ -153,6 +161,7 @@ export const useLogin = () => {
             toast.success("Connexion reussie ✅")
         }
 
+        toast.dismiss(loadingID);
         setWaiting(false);
     }
 

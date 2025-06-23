@@ -47,7 +47,7 @@ export default function LoginPage() {
 
                 {/* Pseudo */}
                 <Input
-                    placeholder="Votre pseudo"
+                    placeholder="Pseudo"
                     value={pseudo}
                     onChange={(e) => setPseudo(e.target.value)}
                 />
@@ -75,7 +75,7 @@ export default function LoginPage() {
                         variant={loginButtonIsDisabled ? "disabled" : "default"}
                         className="w-full"
                     >
-                        S'inscrire
+                        Créer le compte
                     </Button>
                 </Link>
 

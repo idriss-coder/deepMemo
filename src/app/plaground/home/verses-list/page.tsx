@@ -17,7 +17,7 @@ export default function VersetListPage() {
     return (
         <div>
             <HeroSection verses={myVerses}/>
-            <div className={"px-[20px] mt-[20px] flex flex-col gap-3"}>
+            <div className={"px-[20px] mt-[20px] flex flex-col gap-3 mb-16"}>
                 <NavSection
                     versetCount={myVerses ? myVerses.length : 0}
                 />
