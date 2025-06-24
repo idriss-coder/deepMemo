@@ -349,7 +349,7 @@ const PlayProgress: React.FC<PlayProgressProps> = ({
                 {withEffect && (
                     <motion.div
                         key={successiveWinCount}
-                        className="flex items-center justify-center gap-1 top-1 w-full absolute -bottom-9"
+                        className="flex items-center justify-center gap-1 top-2 w-full mx-6 absolute -bottom-9"
                         initial={{scale: 0.5, opacity: 0}}
                         animate={{scale: 1, opacity: 1}}
                         exit={{scale: 0.5, opacity: 0}}

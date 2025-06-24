@@ -5,9 +5,6 @@ import UserService from "@/service/UserService";
 import {isOnline} from "@/lib/utils";
 
 
-const userService = new UserService()
-
-
 const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
     useEffect(() => {
@@ -21,7 +18,6 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
             //     return
             // }
 
-            void userService.requestProfile()
             void handleOnline()
         }
 

@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button";
 import React, {useMemo} from "react";
 import Link from "next/link";
 import {useLogin} from "@/hooks/_screens/useAuth";
+import {X} from "lucide-react";
 
 export default function LoginPage() {
 
@@ -27,7 +28,18 @@ export default function LoginPage() {
 
     return (
         <div className={"flex flex-col gap-[26px]"}>
-            <h1 className="text-white/20 text-lg  font-['Feather'] text-center">Se connecter à DeepMemo</h1>
+            <div className="flex items-center justify-between w-full">
+                <Link href="/plaground/home">
+                    <button
+                        className="text-white/70 hover:text-white bg-white/[0.01] hover:bg-white/5 size-10 flex items-center justify-center border border-white/[0.01] hover:border-white/[0.02] rounded-full transition-all duration-200 backdrop-blur-sm">
+                        <X size={18} strokeWidth={2.5}/>
+                    </button>
+                </Link>
+                <h1 className="text-white/20 text-lg font-['Feather'] text-center">
+                    Se connecter
+                </h1>
+                <div></div>
+            </div>
             <div className={"flex flex-col gap-[10px]"}>
                 <Input
                     placeholder={"Adresse email"}
