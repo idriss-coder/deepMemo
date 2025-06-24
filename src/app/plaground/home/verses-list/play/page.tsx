@@ -28,7 +28,6 @@ import {
 import {useRouter} from "next/navigation";
 import {CloseConfirm, TransitionScreen} from "@/app/plaground/home/verses-list/play/components/closeConfirm";
 import {useGameplayArea} from "@/hooks/useGameplay";
-import {Verset} from "@/lib/db";
 import {bookMapById, SimpleBook} from "@/backend/mock/bible-book";
 import {Heart, LoaderIcon} from "lucide-react";
 import dynamic from 'next/dynamic'
@@ -37,6 +36,7 @@ import starLotie from "@/effect/star.json"
 import {DifficultSelectScreen} from "@/app/plaground/home/verses-list/play/stage/dificult-select";
 import {HardPlayground} from "@/app/plaground/home/verses-list/play/stage/hard-playground";
 import accEnabled from "@/effect/acc-enabled.json";
+import type {Verset} from "@/lib/db";
 
 const Lottie = dynamic(
     () => import('lottie-react'),
@@ -361,7 +361,7 @@ const PlayProgress: React.FC<PlayProgressProps> = ({
                     >
                         <DGuardIcon/>
                         <div className="text-center text-[#ffc800] text-xs font-normal">
-                            {successiveWinCount} d’affilés
+                            {successiveWinCount} d'affilés
                         </div>
                     </motion.div>
                 )}
@@ -669,7 +669,7 @@ const ClosePartyScreen: React.FC<{ state: "closed" | "opened", onCloseCancel: ()
             performText={"Terminer la session"}
             performAction={() => {
                 stopAllSounds();
-                $router.push("/plaground/home/verses-list")
+                $router.push("/plaground/home")
             }}
         />
     )
@@ -695,7 +695,7 @@ const EndPartyScreen: React.FC<{ score: number }> = ({score}) => {
                         terminé !
                     </div>
                     {score <= 7 && <div className="text-[16px] text-center">
-                        Ne t’en fais pas, tu feras mieux la prochaine fois !
+                        Ne t'en fais pas, tu feras mieux la prochaine fois !
                     </div>}
                 </div>
                 <div className={"flex gap-3 w-full"}>
@@ -729,7 +729,7 @@ const EndPartyScreen: React.FC<{ score: number }> = ({score}) => {
                     className="w-full"
                     onClick={() => {
                         stopAllSounds();
-                        $router.push("/plaground/home/verses-list")
+                        $router.push("/plaground/home")
                     }}
                 >
                     Continuer

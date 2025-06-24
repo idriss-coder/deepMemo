@@ -19,7 +19,7 @@ export const DashboardHeader: React.FC = () => {
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold font-['Feather'] text-white">
-                                DeepMemo Canva
+                                DeepMemo Builder
                             </h1>
                             <p className="text-muted-foreground font-['Feather'] mt-1 flex items-center gap-2">
                                 <Activity className="w-4 h-4" />

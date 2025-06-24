@@ -9,10 +9,13 @@ import {useRouter} from "next/navigation";
 import {SoundThemRegulator} from "@/app/plaground/home/_components/sound";
 import {AnimatePresence, motion} from "framer-motion";
 import {getBgColorFromLetter} from "@/components/customize/utils";
-import {useGetLocalUser, useSignOut} from "@/hooks/_screens/useAuth";
+import {useProfile, useSignOut} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
+import {useCategories} from "@/app/admin/dashboard/_hooks/useCategories";
 
 export default function HomPage() {
+
+    const {categories, loading} = useCategories({includeDisabled: false});
 
     return (
         <div>
@@ -24,10 +27,22 @@ export default function HomPage() {
                         <h1 className="text-white text-xl font-bold font-['Feather']">Entrainements</h1>
                     </div>
 
-                    <div>
+                    <div className={"flex flex-col gap-[15px]"}>
                         <Link href={"/plaground/home/verses-list"}>
-                            <TrainingItem/>
+                            <TrainingItem label={"Mes versets bibliques"}/>
                         </Link>
+                        {loading ? "Un instant..." : (
+                            categories?.map((ctg, k) => (
+                                <Link
+                                    key={k}
+                                    href={`/plaground/home/verses-list?training_id=${ctg._id}`}
+                                >
+                                    <TrainingItem
+                                        label={ctg.name}
+                                    />
+                                </Link>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
@@ -35,7 +50,7 @@ export default function HomPage() {
     )
 }
 
-const TrainingItem = () => {
+const TrainingItem: React.FC<{ label?: string }> = ({label}) => {
 
     const [load, setLoad] = useState(false)
 
@@ -51,7 +66,7 @@ const TrainingItem = () => {
             )}
         >
             <div
-                className="text-white/90 text-base font-bold font-['Feather']">{load ? "Un instant..." : "Versets bibliques"}</div>
+                className="text-white/90 text-base font-bold font-['Feather']">{load ? "Un instant..." : label}</div>
             <DBook/>
         </button>
     )
@@ -59,7 +74,7 @@ const TrainingItem = () => {
 
 const TrainingUser = () => {
 
-    const {user} = useGetLocalUser()
+    const {profile: user} = useProfile()
     const [settingsOpen, setSettingsOpen] = React.useState(false)
     const $router = useRouter()
     const {handlerSignOut} = useSignOut()
@@ -120,7 +135,7 @@ const TrainingUser = () => {
 const UerAvatarWrap: React.FC<{ variant?: "default" | "sm" }> = ({
                                                                      variant,
                                                                  }) => {
-    const {user, showFullPseudo, userAvatar} = useGetLocalUser()
+    const {profile: user, showFullPseudo, userAvatar} = useProfile()
     const isSM = variant === "sm";
 
 

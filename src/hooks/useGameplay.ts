@@ -1,9 +1,9 @@
 // useGameplayArea.ts
 import React, {useCallback, useEffect, useState} from "react";
-import {Verset} from "@/lib/db";
 import {useVerses} from './useVerses';
 import {Difficult, shuffleArray} from "@/lib/utils";
-import {useGetLocalUser} from "@/hooks/_screens/useAuth"; // Hook d'exemple fourni
+import type {Verset} from "@/lib/db";
+import {useSearchParams} from "next/navigation";
 
 export interface QuizItem {
     id: number;               // question index (0-based)
@@ -47,13 +47,14 @@ function getRandomOptions(correct: Verset, allVerses: Verset[]): Verset[] {
 // }
 
 export function useGameplayArea() {
-    const {user} = useGetLocalUser()
-    const {verses: myVerses} = useVerses(user?.user_id)
+    // Utilisation de React Query pour récupérer les versets
+    const $q = useSearchParams()
+    const training_id = $q.get("training_id");
+    const {verses: myVerses, loading} = useVerses(training_id ?? undefined);
     const [quizData, setQuizData] = useState<QuizItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [completed, setCompleted] = useState<boolean>(false);
     const [difficult, setDifficult] = React.useState<Difficult>()
-
 
     // Ajout de mécaniques supplémentaires
     const [score, setScore] = useState<number>(0);
@@ -72,7 +73,6 @@ export function useGameplayArea() {
      */
     useEffect(() => {
         if (!myVerses || myVerses.length === 0) return;
-
 
         const shuffledVerses = shuffleArray(myVerses);
         const selected = shuffledVerses.slice(0, 10);
@@ -273,5 +273,8 @@ export function useGameplayArea() {
         nextQuestion,
         resetQuiz,
         replayMistakes,
+        wrongAnswers,
+        setWrongAnswers,
+        loading
     };
 }

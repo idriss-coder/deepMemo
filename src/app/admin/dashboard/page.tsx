@@ -16,21 +16,43 @@ export default function AdminDashboard() {
         error,
         createCategory,
         updateCategory,
+        toggleActive,
         deleteCategory,
         createVersetAndAddToCategory,
-        removeVersetFromCategory
-    } = useCategories();
+        removeVersetFromCategory,
+        isCreating
+    } = useCategories({includeDisabled: true});
 
     const handleCreateCategory = async (name: string) => {
-        await createCategory(name);
+        try {
+            await createCategory(name);
+        } catch (error) {
+            console.error("Erreur lors de la création de la catégorie:", error);
+        }
     };
 
     const handleUpdateCategory = async (id: string, name: string) => {
-        await updateCategory(id, name);
+        try {
+            await updateCategory({id, name});
+        } catch (error) {
+            console.error("Erreur lors de la mise à jour de la catégorie:", error);
+        }
+    };
+
+    const handleToggleActive = async (id: string, isActive: boolean) => {
+        try {
+            await toggleActive({id, isActive});
+        } catch (error) {
+            console.error("Erreur lors du changement d'état de la catégorie:", error);
+        }
     };
 
     const handleDeleteCategory = async (id: string) => {
-        await deleteCategory(id);
+        try {
+            await deleteCategory(id);
+        } catch (error) {
+            console.error("Erreur lors de la suppression de la catégorie:", error);
+        }
     };
 
     const handleAddVerset = async (categoryId: string, versetData: {
@@ -39,11 +61,19 @@ export default function AdminDashboard() {
         verses_num: number[];
         content: string;
     }) => {
-        await createVersetAndAddToCategory(categoryId, versetData);
+        try {
+            await createVersetAndAddToCategory({categoryId, versetData});
+        } catch (error) {
+            console.error("Erreur lors de l'ajout du verset:", error);
+        }
     };
 
     const handleRemoveVerset = async (categoryId: string, versetId: string) => {
-        await removeVersetFromCategory(categoryId, versetId);
+        try {
+            await removeVersetFromCategory({categoryId, versetId});
+        } catch (error) {
+            console.error("Erreur lors de la suppression du verset:", error);
+        }
     };
 
     return (
@@ -70,17 +100,18 @@ export default function AdminDashboard() {
                     <TabsContent value="categories" className="space-y-6">
                         <CreateCategoryForm
                             onSubmit={handleCreateCategory}
-                            loading={loading}
+                            loading={isCreating}
                             error={error}
                         />
 
                         <div className="space-y-4">
-                            {categories.map((category: Category) => (
+                            {categories.reverse().map((category: Category) => (
                                 <CategoryCard
                                     key={category._id}
                                     category={category}
                                     onUpdate={handleUpdateCategory}
                                     onDelete={handleDeleteCategory}
+                                    onToggleActive={handleToggleActive}
                                     onAddVerset={handleAddVerset}
                                     onRemoveVerset={handleRemoveVerset}
                                 />

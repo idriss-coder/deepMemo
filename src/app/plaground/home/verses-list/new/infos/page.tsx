@@ -7,20 +7,16 @@ import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {useRouter, useSearchParams} from "next/navigation";
 import {BibleBook} from "@/backend/mock/bible-book";
-import {Verset} from "@/lib/db";
 import {
     DeleteVersetConfirmScreen,
     ListGrid
 } from "@/app/plaground/home/verses-list/new/infos/_components/list-grid-component";
-import VersetService from "@/service/VersetServie";
-import {useGetLocalUser, useGetProfile} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
 import {cn, removeNumberAtStart, startsWithNumber} from "@/lib/utils";
 import Image from "next/image";
 import {DArrowGoIcon} from "@/components/customize/icons";
-import {useVerses} from "@/hooks/useVerses";
-
-const versetService = new VersetService()
+import {useVerses, useVersetMutations} from "@/hooks/useVerses";
+import {useProfile} from "@/hooks/_screens/useAuth";
 
 export default function VersetInfos() {
     const [curStep, setCurStep] = React.useState<number>(1)
@@ -30,13 +26,12 @@ export default function VersetInfos() {
     const [mockedDescription, setMockedDescription] = React.useState<string>()
     const [description, setDescription] = React.useState<string | undefined>()
     const [requestDelete, setRequestDelete] = React.useState(false)
-    const [loading, setLoading] = React.useState(false)
     const [clipboardContent, setClipboardContent] = useState<string>('');
-    const {user} = useGetLocalUser()
-    const {verses: myVerses} = useVerses(user?.user_id)
+    const {profile: user} = useProfile()
+    const {verses: myVerses} = useVerses()
+    const {createVerset, updateVerset, deleteVerset, isCreating, isUpdating, isDeleting} = useVersetMutations()
 
     const $q = useSearchParams()
-    const {profile} = useGetProfile()
     const $router = useRouter()
     const book_id = $q.get("book_id")
     const verset_id = $q.get("verset_id")
@@ -56,7 +51,7 @@ export default function VersetInfos() {
         const requestVerset = async () => {
             console.log(`requestVerset ${verset_id}`)
             if (!verset_id) return
-            const versetData = myVerses.find(v => String(v.id) === verset_id)
+            const versetData = myVerses.find(v => String(v._id) === verset_id)
             if (versetData) {
                 setChapter(versetData.chapter_num)
                 setLocalId(versetData.local_id)
@@ -122,59 +117,60 @@ export default function VersetInfos() {
     }, [chapter, versets, book])
 
     const handleDeleteVerset = async () => {
-        if (!verset_id) return
-        const toastId = toast.loading("Supression en cour...")
-        if (localId)
-            await versetService.deleteVerset(localId)
-        toast.dismiss(toastId)
-        toast.success("Verset supprimé...")
-        $router.push("/plaground/home/verses-list")
+        if (!verset_id || !localId) return
+        const toastId = toast.loading("Suppression en cours...")
+        try {
+            await deleteVerset(localId)
+            toast.dismiss(toastId)
+            toast.success("Verset supprimé")
+            $router.push("/plaground/home/verses-list")
+        } catch (error) {
+            toast.dismiss(toastId)
+            toast.error("Erreur lors de la suppression")
+        }
     }
 
     const handleUpdateVerset = async () => {
-        if (!verset_id) return
-        if (description) {
-            const toastId = toast.loading("MAJ en cours...");
-            if (localId)
-                await versetService.updateVerset(localId, description)
+        if (!verset_id || !localId || !description) return
+        const toastId = toast.loading("Mise à jour en cours...");
+        try {
+            await updateVerset({localId, content: description})
             toast.dismiss(toastId)
-            toast.success("Verset MAJ")
+            toast.success("Verset mis à jour")
+            $router.push("/plaground/home/verses-list")
+        } catch (error) {
+            toast.dismiss(toastId)
+            toast.error("Erreur lors de la mise à jour")
         }
-        $router.push("/plaground/home/verses-list")
     }
 
     async function handleAddVerset() {
+        if (!book_id || !chapter || !versets || !description || !user?.user_id) return
 
-        if (!book_id) return
-        if (!chapter) return
-        if (!versets) return
-        if (!description) return
-
-        console.log(profile)
-
-        const _verset: Verset = {
-            user_id: profile?.user_id,
+        const _verset = {
+            user_id: user.user_id,
             book_num: +book_id,
             chapter_num: chapter,
             verses_num: versets,
             content: description,
-            createdAt: new Date(),
         }
 
-        setLoading(true)
-        const toadtId = toast.loading("Ajout en cour...")
-        await versetService.addVerset(_verset)
-        toast.dismiss(toadtId)
-        toast.success("Verset ajouté")
-        setLoading(false)
+        const toastId = toast.loading("Ajout en cours...")
+        try {
+            await createVerset(_verset)
+            toast.dismiss(toastId)
+            toast.success("Verset ajouté")
 
-        setChapter(undefined)
-        setVersets(undefined)
-        setDescription(undefined)
+            setChapter(undefined)
+            setVersets(undefined)
+            setDescription(undefined)
 
-        $router.push("/plaground/home/verses-list")
+            $router.push("/plaground/home/verses-list")
+        } catch (error) {
+            toast.dismiss(toastId)
+            toast.error("Erreur lors de l'ajout")
+        }
     }
-
 
     const fadeInUp = {
         initial: {opacity: 0, y: 20},
@@ -184,7 +180,6 @@ export default function VersetInfos() {
     }
 
     if (!book) {
-
         return (
             <div className={"p-[20px]"}>
                 <div className={"w-full h-[300px] bg-slate-500 animate-pulse"}>
@@ -278,7 +273,7 @@ export default function VersetInfos() {
                                     </div>
                                 </div>
                                 <div className="text-[#4e5b64] text-sm font-normal leading-snug">
-                                    Vous n’êtes pas obligé d’inclure tout le verset : un simple aperçu suffit pour vous
+                                    Vous n'êtes pas obligé d'inclure tout le verset : un simple aperçu suffit pour vous
                                     en rappeler rapidement.
                                 </div>
                             </div>
@@ -296,11 +291,11 @@ export default function VersetInfos() {
                         <Button
                             variant={(isUpdate ? (description == mockedDescription) || !description : (!description)) ? "disabled" : "default"}
                             className="w-full"
-                            disabled={isUpdate ? (description == mockedDescription) || !description : (!description)}
+                            disabled={isUpdate ? (description == mockedDescription) || !description : (!description) || isUpdating || isCreating}
                             onClick={isUpdate ? handleUpdateVerset : handleAddVerset}
                         >
-                            {loading ? (
-                                    <span>Ajout en cour...</span>
+                            {isCreating || isUpdating ? (
+                                    <span>{isUpdate ? "Mise à jour en cours..." : "Ajout en cours..."}</span>
                                 ) :
                                 (<>
                                     {isUpdate ? "Mettre à jour le verset" : "Ajouter le verset"}
@@ -309,9 +304,10 @@ export default function VersetInfos() {
                         </Button>
                         {isUpdate && <Button
                             variant={"textRed"}
+                            disabled={isDeleting}
                             onClick={() => setRequestDelete(true)}
                         >
-                            Supprimer le verset
+                            {isDeleting ? "Suppression..." : "Supprimer le verset"}
                         </Button>}
                     </div>
                 </motion.div>}
@@ -325,7 +321,6 @@ export default function VersetInfos() {
         </Suspense>
     )
 }
-
 
 const ClipboardStatus = () => {
     return (

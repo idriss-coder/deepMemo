@@ -2,25 +2,38 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
-import {ScrollArea} from "@/components/ui/scroll-area";
 import {CategoryCardProps} from "../_types";
 import {VersetCreator} from "./VersetCreator";
-import {BookOpen, ChevronDown, ChevronRight, Edit, Hash, MoreVertical, Plus, Trash2} from "lucide-react";
+import {DeleteConfirmationModal} from "./DeleteConfirmationModal";
+import {
+    BookOpen,
+    ChevronDown,
+    ChevronRight,
+    Edit,
+    Hash,
+    MoreVertical,
+    Plus,
+    Power,
+    PowerOff,
+    Trash2
+} from "lucide-react";
 import {AnimatePresence, motion} from "framer-motion";
 import {normalizeVersetTitle} from "@/lib/utils";
 import {bookMapById} from "@/backend/mock/bible-book";
-import { DropdownMenu } from "@radix-ui/react-dropdown-menu";
+import {DropdownMenu} from "@radix-ui/react-dropdown-menu";
 import {
-    DropdownMenuContent, DropdownMenuItem,
-    DropdownMenuLabel,
+    DropdownMenuContent,
+    DropdownMenuItem,
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import {useCategories} from "../_hooks/useCategories";
 
 export const CategoryCard: React.FC<CategoryCardProps> = ({
                                                               category,
                                                               onUpdate,
                                                               onDelete,
+                                                              onToggleActive,
                                                               onAddVerset,
                                                               onRemoveVerset
                                                           }) => {
@@ -29,7 +42,17 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     const [showVersetCreator, setShowVersetCreator] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    // Récupérer les états de chargement depuis le hook
+    const {
+        isUpdating,
+        isDeleting,
+        isCreatingVerset,
+        isRemovingVerset,
+        isToggling
+    } = useCategories({includeDisabled: true});
 
     // Fermer le dropdown quand on clique en dehors
     useEffect(() => {
@@ -60,8 +83,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     };
 
     const saveEditing = async () => {
-        await onUpdate(category._id, editName);
-        setEditingCategory(false);
+        try {
+            await onUpdate(category._id, editName);
+            setEditingCategory(false);
+        } catch (error) {
+            console.error("Erreur lors de la mise à jour:", error);
+        }
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -78,13 +105,34 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         verses_num: number[];
         content: string;
     }) => {
-        await onAddVerset(category._id, versetData);
-        setShowVersetCreator(false);
+        try {
+            await onAddVerset(category._id, versetData);
+            setShowVersetCreator(false);
+        } catch (error) {
+            console.error("Erreur lors de la création du verset:", error);
+        }
     };
 
-    const handleDelete = () => {
+    const handleDelete = async () => {
         setShowDropdown(false);
-        onDelete(category._id);
+        setShowDeleteModal(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        try {
+            await onDelete(category._id);
+            setShowDeleteModal(false);
+        } catch (error) {
+            console.error("Erreur lors de la suppression:", error);
+        }
+    };
+
+    const handleToggleActive = async () => {
+        try {
+            await onToggleActive(category._id, !category.isActive);
+        } catch (error) {
+            console.error("Erreur lors du changement d'état:", error);
+        }
     };
 
     const toggleExpansion = () => {
@@ -96,7 +144,11 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
     return (
         <>
             <motion.div
-                className="bg-bgPrimarySecondary/10 border border-bgPrimarySecondary/30 rounded-2xl backdrop-blur-sm hover:border-lPrimary/40 hover:bg-bgPrimarySecondary/20 transition-all duration-300 group"
+                className={`bg-bgPrimarySecondary/10 border rounded-2xl backdrop-blur-sm transition-all duration-300 group ${
+                    category.isActive
+                        ? "border-bgPrimarySecondary/30 hover:border-lPrimary/40 hover:bg-bgPrimarySecondary/20"
+                        : "border-red-500/30 bg-red-500/5 opacity-60"
+                }`}
                 initial={{opacity: 0, y: 20}}
                 animate={{opacity: 1, y: 0}}
                 transition={{duration: 0.3}}
@@ -108,7 +160,12 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                             {/* Expand/Collapse Button */}
                             <button
                                 onClick={toggleExpansion}
-                                className="flex items-center justify-center w-8 h-8 rounded-lg bg-bgPrimarySecondary/30 hover:bg-bgPrimarySecondary/50 transition-colors duration-200 group-hover:bg-lPrimary/20 focus:outline-none focus:ring-2 focus:ring-lPrimary/50"
+                                //disabled={!category.isActive}
+                                className={`flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-lPrimary/50 ${
+                                    category.isActive
+                                        ? "bg-bgPrimarySecondary/30 hover:bg-bgPrimarySecondary/50 group-hover:bg-lPrimary/20"
+                                        : "bg-red-500/20"
+                                }`}
                                 aria-label={isExpanded ? "Réduire les versets" : "Afficher les versets"}
                             >
                                 <AnimatePresence mode="wait">
@@ -120,7 +177,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                             exit={{rotate: 90}}
                                             transition={{duration: 0.2}}
                                         >
-                                            <ChevronDown className="w-4 h-4 text-muted-foreground"/>
+                                            <ChevronDown
+                                                className={`w-4 h-4 ${category.isActive ? "text-muted-foreground" : "text-red-400"}`}/>
                                         </motion.div>
                                     ) : (
                                         <motion.div
@@ -130,7 +188,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                             exit={{rotate: -90}}
                                             transition={{duration: 0.2}}
                                         >
-                                            <ChevronRight className="w-4 h-4 text-muted-foreground"/>
+                                            <ChevronRight
+                                                className={`w-4 h-4 ${category.isActive ? "text-muted-foreground" : "text-red-400"}`}/>
                                         </motion.div>
                                     )}
                                 </AnimatePresence>
@@ -138,9 +197,13 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
                             {/* Category Icon & Name */}
                             <div className="flex items-center gap-3 flex-1">
-                                <div
-                                    className="w-10 h-10 rounded-xl bg-gradient-to-br from-lPrimary/20 to-lPrimary/10 border border-lPrimary/30 flex items-center justify-center">
-                                    <BookOpen className="w-5 h-5 text-lPrimary"/>
+                                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
+                                    category.isActive
+                                        ? "bg-gradient-to-br from-lPrimary/20 to-lPrimary/10 border-lPrimary/30"
+                                        : "bg-gradient-to-br from-red-500/20 to-red-500/10 border-red-500/30"
+                                }`}>
+                                    <BookOpen
+                                        className={`w-5 h-5 ${category.isActive ? "text-lPrimary" : "text-red-400"}`}/>
                                 </div>
 
                                 {editingCategory ? (
@@ -151,18 +214,26 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                             onChange={e => setEditName(e.target.value)}
                                             onKeyDown={handleKeyDown}
                                             autoFocus
+                                            disabled={isUpdating}
                                         />
                                         <Button
                                             size="sm"
                                             onClick={saveEditing}
+                                            disabled={isUpdating}
                                             className="bg-[#92d233] hover:bg-[#92d233]/80 text-white"
                                         >
-                                            ✓
+                                            {isUpdating ? (
+                                                <div
+                                                    className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
+                                            ) : (
+                                                "✓"
+                                            )}
                                         </Button>
                                         <Button
                                             size="sm"
                                             variant="outline"
                                             onClick={cancelEditing}
+                                            disabled={isUpdating}
                                             className="border-red-500/50 text-red-400 hover:bg-red-500/10"
                                         >
                                             ✕
@@ -170,10 +241,24 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                     </div>
                                 ) : (
                                     <div className="flex-1">
-                                        <h3 className="text-xl font-bold font-['Feather'] text-white group-hover:text-lPrimary transition-colors duration-200">
-                                            {category.name}
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground font-['Feather']">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className={`text-xl font-bold font-['Feather'] transition-colors duration-200 ${
+                                                category.isActive
+                                                    ? "text-white group-hover:text-lPrimary"
+                                                    : "text-red-400"
+                                            }`}>
+                                                {category.name}
+                                            </h3>
+                                            {!category.isActive && (
+                                                <span
+                                                    className="px-2 py-1 text-xs font-bold text-red-400 bg-red-500/20 border border-red-500/30 rounded-md">
+                                                    DÉSACTIVÉE
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className={`text-sm font-['Feather'] ${
+                                            category.isActive ? "text-muted-foreground" : "text-red-400/70"
+                                        }`}>
                                             {versetCount} verset{versetCount !== 1 ? 's' : ''}
                                         </p>
                                     </div>
@@ -181,6 +266,27 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                             </div>
                         </div>
 
+                        {/* Toggle Active Button */}
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={handleToggleActive}
+                            disabled={isToggling}
+                            className={`w-8 h-8 p-0 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-lPrimary/50 ${
+                                category.isActive
+                                    ? "hover:bg-green-500/20 text-green-400"
+                                    : "hover:bg-red-500/20 text-red-400"
+                            }`}
+                        >
+                            {isToggling ? (
+                                <div
+                                    className="w-4 h-4 border-2 border-current/30 border-t-current rounded-full animate-spin"/>
+                            ) : category.isActive ? (
+                                <Power className="w-4 h-4"/>
+                            ) : (
+                                <PowerOff className="w-4 h-4"/>
+                            )}
+                        </Button>
 
                         {/* Actions Dropdown */}
                         <DropdownMenu>
@@ -188,9 +294,15 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                 <Button
                                     size="sm"
                                     variant="ghost"
+                                    disabled={isDeleting}
                                     className="w-8 h-8 p-0 hover:bg-bgPrimarySecondary/50 focus:outline-none focus:ring-2 focus:ring-lPrimary/50"
                                 >
-                                    <MoreVertical className="w-4 h-4 text-muted-foreground"/>
+                                    {isDeleting ? (
+                                        <div
+                                            className="w-4 h-4 border-2 border-muted-foreground/30 border-t-muted-foreground rounded-full animate-spin"/>
+                                    ) : (
+                                        <MoreVertical className="w-4 h-4 text-muted-foreground"/>
+                                    )}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent 
@@ -199,6 +311,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                             >
                                 <DropdownMenuItem
                                     onClick={startEditing}
+                                    disabled={isUpdating}
                                     className=""
                                 >
                                     <Edit className="w-4 h-4"/>
@@ -209,6 +322,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                     onClick={() => {
                                         setShowVersetCreator(true);
                                     }}
+                                    disabled={isCreatingVerset}
                                     className=""
                                 >
                                     <Plus className="w-4 h-4"/>
@@ -217,10 +331,11 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                 <DropdownMenuSeparator className="bg-bgPrimarySecondary/60"/>
                                 <DropdownMenuItem
                                     onClick={handleDelete}
+                                    disabled={isDeleting}
                                     className=""
                                 >
                                     <Trash2 className="w-4 h-4"/>
-                                    Supprimer
+                                    {isDeleting ? "Suppression..." : "Supprimer"}
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -245,6 +360,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                     <VersetsList
                                         versets={category.versets || []}
                                         onRemoveVerset={(versetId) => onRemoveVerset(category._id, versetId)}
+                                        isRemoving={isRemovingVerset}
                                     />
                                 )}
                             </div>
@@ -253,11 +369,23 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                 </AnimatePresence>
             </motion.div>
 
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmationModal
+                isOpen={showDeleteModal}
+                onClose={() => setShowDeleteModal(false)}
+                onConfirm={handleConfirmDelete}
+                title="Supprimer la catégorie"
+                message={`Êtes-vous sûr de vouloir supprimer la catégorie "${category.name}" ? Cette action est irréversible et supprimera également tous les versets associés à cette catégorie.`}
+                itemName={category.name}
+                isLoading={isDeleting}
+            />
+
             {/* Verset Creator Modal */}
             <VersetCreator
                 isOpen={showVersetCreator}
                 onClose={() => setShowVersetCreator(false)}
                 onVersetCreated={handleVersetCreated}
+                isCreating={isCreatingVerset}
             />
         </>
     );
@@ -289,7 +417,8 @@ const EmptyVersetsMessage: React.FC<{ onAddVerset: () => void }> = ({onAddVerset
 const VersetsList: React.FC<{
     versets: any[];
     onRemoveVerset: (versetId: string) => void;
-}> = ({versets, onRemoveVerset}) => (
+    isRemoving?: boolean;
+}> = ({versets, onRemoveVerset, isRemoving}) => (
     <div className="space-y-3">
         <div className="flex items-center gap-2 mb-4">
             <Hash className="w-4 h-4 text-lPrimary"/>
@@ -298,9 +427,9 @@ const VersetsList: React.FC<{
             </h4>
         </div>
 
-        <ScrollArea className="max-h-64">
+        <div>
             <div className="space-y-2 pr-4">
-                {versets.map((verset) => (
+                {versets.reverse().map((verset) => (
                     <motion.div
                         key={verset._id}
                         initial={{opacity: 0, x: -20}}
@@ -327,13 +456,19 @@ const VersetsList: React.FC<{
                             size="sm"
                             variant="ghost"
                             onClick={() => onRemoveVerset(verset._id)}
+                            disabled={isRemoving}
                             className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-red-400 hover:text-red-300 hover:bg-red-500/10"
                         >
-                            <Trash2 className="w-4 h-4"/>
+                            {isRemoving ? (
+                                <div
+                                    className="w-4 h-4 border-2 border-red-400/30 border-t-red-400 rounded-full animate-spin"/>
+                            ) : (
+                                <Trash2 className="w-4 h-4"/>
+                            )}
                         </Button>
                     </motion.div>
                 ))}
             </div>
-        </ScrollArea>
+        </div>
     </div>
 ); 

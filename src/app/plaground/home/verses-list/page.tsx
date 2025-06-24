@@ -5,16 +5,18 @@ import {Button} from "@/components/ui/button";
 import {BackButton, SpinnerLoader} from "@/components/customize/utils";
 import Link from "next/link";
 import React, {useEffect, useMemo} from "react";
-import {Verset} from "@/lib/db";
 import {Book, bookMapById} from "@/backend/mock/bible-book";
 import {useVerses} from "@/hooks/useVerses";
 import {normalizeVersetTitle} from "@/lib/utils";
 import ButtonLoader from "@/components/customize/buttonLoader";
-import {useGetLocalUser} from "@/hooks/_screens/useAuth";
+import type {Verset} from "@/lib/db";
+import {useSearchParams} from "next/navigation";
+import {useCategories} from "@/app/admin/dashboard/_hooks/useCategories";
 
 export default function VersetListPage() {
-    const {user} = useGetLocalUser()
-    const {verses: myVerses, loading} = useVerses(user?.user_id)
+    const $q = useSearchParams()
+    const training_id = $q.get("training_id");
+    const {verses: myVerses, loading} = useVerses(training_id ?? undefined)
 
     return (
         <div>
@@ -23,11 +25,11 @@ export default function VersetListPage() {
                 <NavSection
                     versetCount={myVerses ? myVerses.length : 0}
                 />
-                <NewVerset/>
+                {!training_id && <NewVerset/>}
                 {(loading) && (
                     <VersesListSkeleton/>
                 )}
-                {(myVerses && myVerses.length < 5 && !loading) &&
+                {(myVerses && myVerses.length < 5 && !loading) && !training_id &&
                     <EmptyVerses
                         verses={myVerses}
                     />
@@ -65,14 +67,22 @@ const VersetListView: React.FC<{ verses?: Verset[] }> = ({verses}) => {
 
 const HeroSection: React.FC<{ verses?: Verset[] }> = ({verses}) => {
 
+    const $q = useSearchParams()
+    const training_id = $q.get("training_id");
     const [loading, setLoading] = React.useState(false)
+    const {categories, loading: loadingCtg} = useCategories({includeDisabled: false})
 
     useEffect(() => {
-
         return () => {
             setLoading(false)
         }
     }, [])
+
+    const curCtg = useMemo(() => {
+        if (!training_id) return
+        const ctg = categories.find(c => c._id === training_id)
+        return ctg
+    }, [categories, training_id])
 
     const canPlay = useMemo(() => {
         return verses && verses.length >= 5
@@ -89,8 +99,7 @@ const HeroSection: React.FC<{ verses?: Verset[] }> = ({verses}) => {
                 <div
                     className="w-[228px] text-center text-white text-xl font-bold font-['Feather']"
                 >
-                    Entraîne-toi à
-                    memoriser les versets par coeur.
+                   {curCtg?.name ? `${curCtg?.name}` : " Entraîne-toi à memoriser les versets par coeur."}
                 </div>
 
                 <Link
@@ -98,7 +107,7 @@ const HeroSection: React.FC<{ verses?: Verset[] }> = ({verses}) => {
                     onClick={e => {
                         if (!canPlay) e.preventDefault()
                     }}
-                    href={"/plaground/home/verses-list/play"}
+                    href={`/plaground/home/verses-list/play${training_id ? "?training_id=" + training_id : ""}`}
                 >
                     <Button
                         onClick={() => setLoading(true)}
@@ -122,7 +131,7 @@ const HeroSection: React.FC<{ verses?: Verset[] }> = ({verses}) => {
 const NavSection: React.FC<{ versetCount: number }> = ({versetCount}) => {
     return (
         <div className={"flex justify-between items-center"}>
-            <div className="text-white text-xl font-bold font-['Feather']">Mes versets</div>
+            <div className="text-white text-xl font-bold font-['Feather']">Liste des versets</div>
             <VersetCount count={versetCount}/>
         </div>
     )
@@ -201,14 +210,21 @@ const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 
     const book = bookMapById.get(verset.book_num) as Book
 
-    const link = `/plaground/home/verses-list/new/infos?book_id=${verset.book_num}&verset_id=${verset.id}`
+    const $q = useSearchParams()
+    const training_id = $q.get("training_id");
+    const link = `/plaground/home/verses-list/new/infos?book_id=${verset.book_num}&verset_id=${verset._id}`
 
     return (
         <div>
             {/*[{JSON.stringify(verset)}]*/}
             <Link
                 href={link}
-                onClick={() => {
+                onClick={(event) => {
+                    if (training_id) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                        return
+                    }
                     setLoading(true)
                 }}
             >

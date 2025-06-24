@@ -1,5 +1,4 @@
 import React, {useEffect, useMemo, useRef, useState} from "react";
-import {Verset} from "@/lib/db";
 import {AnimatePresence, motion} from "framer-motion";
 import {
     BookSelectSection,
@@ -10,6 +9,7 @@ import {BibleBook, SimpleBook} from "@/backend/mock/bible-book";
 import {ListGrid} from "@/app/plaground/home/verses-list/new/infos/_components/list-grid-component";
 import {normalizeVersetTitle} from "@/lib/utils";
 import {DChevronLeft} from "@/components/customize/icons";
+import type {Verset} from "@/lib/db";
 
 export const HardPlayground: React.FC<{
     onSelect: (v: SimpleBook) => void;

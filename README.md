@@ -6,6 +6,7 @@
 - **Mode Admin** : Les administrateurs peuvent créer des catégories et y ajouter des versets
 - **Interface moderne** : Design sombre avec composants shadcn/ui
 - **Gestion des versets** : CRUD complet avec sélection de livres, chapitres et versets
+- **React Query** : Gestion d'état moderne avec cache et synchronisation automatique
 
 ## Architecture des Versets
 
@@ -51,7 +52,24 @@ GET /api/verses?user_id=user_id_here
 GET /api/verses?category_id=category_id_here
 ```
 
-### Hook useVerses
+#### Mise à jour d'un verset
+
+```typescript
+PUT /api/verses/[local_id]
+{
+  "content": "Nouveau contenu du verset"
+}
+```
+
+#### Suppression d'un verset
+
+```typescript
+DELETE /api/verses/[local_id]
+```
+
+### Hooks React Query
+
+#### useVerses - Récupération des versets
 
 ```typescript
 // Pour les versets d'un utilisateur
@@ -62,6 +80,37 @@ const { verses, loading, error, createVerset } = useVerses(undefined, categoryId
 
 // Pour les versets sans filtre (retourne une erreur)
 const { verses, loading, error, createVerset } = useVerses();
+```
+
+#### useVersetMutations - Opérations CRUD
+
+```typescript
+const {
+  createVerset,
+  updateVerset,
+  deleteVerset,
+  isCreating,
+  isUpdating,
+  isDeleting
+} = useVersetMutations();
+
+// Créer un verset
+await createVerset({
+  user_id: "user_id",
+  book_num: 1,
+  chapter_num: 1,
+  verses_num: [1, 2, 3],
+  content: "Contenu du verset"
+});
+
+// Mettre à jour un verset
+await updateVerset({
+  localId: 123,
+  content: "Nouveau contenu"
+});
+
+// Supprimer un verset
+await deleteVerset(123);
 ```
 
 ### Dashboard Admin
@@ -89,9 +138,32 @@ src/
 │   ├── api/                 # Routes API
 │   └── plaground/          # Interface utilisateur
 ├── components/             # Composants UI
-├── hooks/                  # Hooks personnalisés
+├── hooks/                  # Hooks personnalisés (React Query)
 ├── models/                 # Modèles MongoDB
 └── service/               # Services métier
+```
+
+## Migration de VersetService vers React Query
+
+Le projet a été migré de l'utilisation du `VersetService` vers des hooks React Query pour une meilleure gestion d'état :
+
+### Avantages de React Query :
+- **Cache automatique** : Les données sont mises en cache et synchronisées
+- **Gestion d'état optimiste** : Interface réactive pendant les opérations
+- **Gestion d'erreur centralisée** : Gestion cohérente des erreurs
+- **Invalidation automatique** : Mise à jour automatique des données après mutations
+- **Loading states** : États de chargement intégrés
+
+### Exemple de migration :
+
+```typescript
+// Avant (VersetService)
+const versetService = new VersetService();
+await versetService.addVerset(versetData);
+
+// Après (React Query)
+const { createVerset, isCreating } = useVersetMutations();
+await createVerset(versetData);
 ```
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).

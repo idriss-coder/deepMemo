@@ -17,6 +17,7 @@ interface VersetCreatorProps {
         verses_num: number[];
         content: string;
     }) => Promise<void>;
+    isCreating?: boolean;
 }
 
 type CreationStep = "book" | "chapter" | "versets" | "content";
@@ -24,7 +25,8 @@ type CreationStep = "book" | "chapter" | "versets" | "content";
 export const VersetCreator: React.FC<VersetCreatorProps> = ({
     isOpen,
     onClose,
-    onVersetCreated
+    onVersetCreated,
+    isCreating = false
 }) => {
     const [currentStep, setCurrentStep] = useState<CreationStep>("book");
     const [selectedBook, setSelectedBook] = useState<number | null>(null);
@@ -33,6 +35,8 @@ export const VersetCreator: React.FC<VersetCreatorProps> = ({
     const [content, setContent] = useState("");
     const [loading, setLoading] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
+
+    const isLoading = isCreating || loading;
 
     const book = useMemo(() => {
         if (!selectedBook) return null;
@@ -338,10 +342,10 @@ export const VersetCreator: React.FC<VersetCreatorProps> = ({
                             {currentStep === "content" && (
                                 <Button
                                     onClick={handleContentSubmit}
-                                    disabled={loading || !content.trim()}
+                                    disabled={isLoading || !content.trim()}
                                     className="font-['Feather'] font-bold"
                                 >
-                                    {loading ? "Création..." : "Créer le verset"}
+                                    {isLoading ? "Création..." : "Créer le verset"}
                                 </Button>
                             )}
                         </div>

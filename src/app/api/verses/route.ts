@@ -1,5 +1,6 @@
 import dbConnect from "@/lib/dbConnect";
 import VersetModel from "@/models/VersetModel";
+import CategoryModel from "@/models/CategoryModel";
 import {NextResponse} from "next/server";
 
 export async function POST(req: Request) {
@@ -21,6 +22,23 @@ export async function POST(req: Request) {
                 {success: false, message: "user_id ou category_id doit être fourni"},
                 {status: 400}
             );
+        }
+
+        // Si category_id est fourni, vérifier que la catégorie est active
+        if (category_id) {
+            const category = await CategoryModel.findById(category_id);
+            if (!category) {
+                return NextResponse.json(
+                    {success: false, message: "Catégorie non trouvée"},
+                    {status: 404}
+                );
+            }
+            // if (!category.isActive) {
+            //     return NextResponse.json(
+            //         {success: false, message: "Impossible d'ajouter un verset à une catégorie désactivée"},
+            //         {status: 400}
+            //     );
+            // }
         }
 
         // Générer un local_id unique (simulation)
@@ -84,7 +102,24 @@ export async function GET(req: Request) {
             filter.category_id = category_id;
         }
 
-        const verses = await VersetModel.find(filter).sort({createdAt: -1}).lean();
+        // Récupérer les versets
+        let verses = await VersetModel.find(filter).sort({createdAt: -1}).lean();
+
+        // Si on filtre par user_id, exclure les versets des catégories désactivées
+        if (user_id) {
+            // Récupérer les IDs des catégories actives
+            const activeCategories = await CategoryModel.find({isActive: true}).select('_id');
+            const activeCategoryIds = activeCategories.map(cat => cat._id.toString());
+
+            // Filtrer les versets pour exclure ceux des catégories désactivées
+            verses = verses.filter(verset => {
+                // Si le verset n'a pas de category_id, l'inclure (versets personnels)
+                if (!verset.category_id) return true;
+                // Sinon, vérifier que la catégorie est active
+                return activeCategoryIds.includes(verset.category_id.toString());
+            });
+        }
+
         return NextResponse.json({success: true, verses});
     } catch (error: any) {
         return NextResponse.json(

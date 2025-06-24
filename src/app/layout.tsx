@@ -3,9 +3,9 @@ import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import {TransitionWrapper} from "@/components/customize/transition-wrapper";
 import {Toaster} from "@/components/ui/sonner"
-import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
 import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
 import React from "react";
+import ReactQueryClientWrapper from "./react-query-client-wrapper";
 
 const APP_NAME = "DeepMemo";
 const APP_DEFAULT_TITLE = "Entraîne-toi à memoriser les versets par coeur";
@@ -62,8 +62,6 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const queryClient = new QueryClient();
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -74,13 +72,13 @@ export default function RootLayout({
       <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-bgPrimary text-white`}
       >
-      <QueryClientProvider client={queryClient}>
+      <ReactQueryClientWrapper>
         <TransitionWrapper>
             {children}
         </TransitionWrapper>
         <Toaster/>
         <ReactQueryDevtools initialIsOpen={false} />
-      </QueryClientProvider>
+      </ReactQueryClientWrapper>
       </body>
       </html>
   );

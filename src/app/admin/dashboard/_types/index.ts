@@ -2,6 +2,7 @@ export interface Category {
     _id: string;
     name: string;
     createdAt: string;
+    isActive: boolean;
     versets?: Verset[];
 }
 
@@ -21,6 +22,7 @@ export interface CategoryCardProps {
     category: Category;
     onUpdate: (id: string, name: string) => Promise<void>;
     onDelete: (id: string) => Promise<void>;
+    onToggleActive: (id: string, isActive: boolean) => Promise<void>;
     onAddVerset: (categoryId: string, versetData: {
         book_num: number;
         chapter_num: number;

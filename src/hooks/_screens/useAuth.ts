@@ -5,23 +5,17 @@ import {validateEmail} from "@/lib/utils";
 import {IUser, LoginResponse, RegisterResponse} from "@/models/UserModel";
 import UserService from "@/service/UserService";
 import {AuthManagerGuard} from "@/service/AuthManager";
-import {db, LocalUser} from "@/lib/db";
-import {useVerses} from "@/hooks/useVerses";
-import VersetService from "@/service/VersetServie";
-
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {LocalUser} from "@/lib/db";
 
 const userService = new UserService()
-const versetService = new VersetService()
 
 export const useRegister = () => {
     const [email, setEmail] = useState("");
     const [pseudo, setPseudo] = useState("");
     const [password, setPassword] = useState("");
     const [waiting, setWaiting] = useState(false);
-    const {verses: myVerses} = useVerses()
-
     const $router = useRouter()
-
 
     // Fonction de vérification basique
     const validateForm = () => {
@@ -73,31 +67,9 @@ export const useRegister = () => {
                 toast.success(result.message);
                 AuthManagerGuard.loginToApp(result.user.token)
 
-                //*******************************************
-                const hasNotSynced = myVerses?.find(v => {
-                    return (v.user_id == undefined)
-                })
-
-                if (hasNotSynced && myVerses) {
-
-                    const toastId = toast.loading("Un instant...");
-
-                    for (const v of myVerses) {
-                        await versetService.addVersetToBulk({...v, user_id: result.user.id})
-                    }
-
-                    await db.verses.clear()
-
-                    await versetService.syncWithServer();
-
-                    toast.dismiss(toastId);
-                }
-                //*******************************************
-
-                const timer = setTimeout(() => {
-                    clearTimeout(timer)
+                setTimeout(() => {
                     toast.dismiss(toastID)
-                }, 3000)
+                }, 2000)
 
                 setWaiting(false)
                 $router.replace("/plaground/use-term")
@@ -111,25 +83,20 @@ export const useRegister = () => {
         }
     };
 
-
     return {
         email, setEmail,
         pseudo, setPseudo,
         password, setPassword,
         waiting,
         handlerRegister,
-
     }
 }
 
 export const useLogin = () => {
-
-    const [email, setEmail] = useState<string>();
-    const [password, setPassword] = useState<string>();
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
     const [waiting, setWaiting] = useState(false);
-
     const $router = useRouter()
-
 
     const handlerLogin = async () => {
         if (!email) {
@@ -173,61 +140,31 @@ export const useLogin = () => {
     }
 }
 
-export const useGetProfile = () => {
-
-    const [profile, setLocaleProfile] = useState<LocalUser>()
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            const data = await db.profile.toArray();
-            if (data.length) {
-                setLocaleProfile(data[0]);
-            }
-        };
-        void fetchUser();
-    }, []);
-
-    return {
-        profile
-    }
-}
-
-export const useGetLocalUser = () => {
+// Nouveau hook React Query pour le profil utilisateur
+export const useProfile = () => {
+    const queryClient = useQueryClient();
     const [user, setUser] = useState<LocalUser | undefined>();
     const [showFullPseudo, setShowFullPseudo] = useState(true);
     const [hasRefetched, setHasRefetched] = useState(false);
-
-    // Fonction de récupération de l'utilisateur
-    const fetchUser = async () => {
-        try {
-            const data = await db.profile.toArray();
-            if (data.length > 0) {
-                setUser(data[0]);
-            }
-        } catch (error) {
-            // Gérer l'erreur si nécessaire
-            console.error("Erreur lors du fetch user:", error);
-        }
-    };
-
-    // Premier fetch au montage
-    useEffect(() => {
-        void fetchUser();
-    }, []);
-
-    // Refetch si l'utilisateur n'est pas trouvé, après un délai
-    useEffect(() => {
-        if (!user && !hasRefetched) {
-            const refetchTimer = setTimeout(() => {
-                void fetchUser();
-                setHasRefetched(true);
-            }, 3000); // 3 secondes – ajustez si nécessaire
-
-            return () => clearTimeout(refetchTimer);
-        }
-    }, [user, hasRefetched]);
-
-    // Masque le pseudo complet après 3 secondes une fois que l'utilisateur est défini
+    const {
+        data: profile,
+        isLoading,
+        error,
+        refetch
+    } = useQuery({
+        queryKey: ["profile"],
+        queryFn: async () => {
+            const token = AuthManagerGuard.getToken();
+            const res = await fetch("/api/profile", {
+                headers: {"Authorization": `Bearer ${token}`}
+            });
+            if (!res.ok) throw new Error("Erreur lors du chargement du profil");
+            const data = await res.json();
+            return data.user;
+        },
+        staleTime: 1000 * 60 * 5 // 5 min
+    });
+    // Masque le pseudo complet après 3 secondes une fois que l’utilisateur est défini
     useEffect(() => {
         if (!user) return;
         const timer = setTimeout(() => {
@@ -242,20 +179,14 @@ export const useGetLocalUser = () => {
         if (user.pseudo.length < 2) return user.pseudo;
         return user.pseudo.slice(0, 2);
     }, [user]);
-
-    return {
-        user,
-        userAvatar,
-        showFullPseudo
-    };
+    return {profile, isLoading, error, refetch, userAvatar, showFullPseudo};
 };
 
 export const useSignOut = () => {
+    const $router = useRouter();
     const handlerSignOut = async () => {
-        AuthManagerGuard.logoutToApp()
-        db.profile.clear()
-    }
-    return {
-        handlerSignOut
-    }
-}
+        AuthManagerGuard.logoutToApp();
+        $router.replace("/auth/login");
+    };
+    return {handlerSignOut};
+};
