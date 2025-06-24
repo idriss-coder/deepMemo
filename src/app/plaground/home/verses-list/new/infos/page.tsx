@@ -7,22 +7,24 @@ import {Textarea} from "@/components/ui/textarea";
 import {Button} from "@/components/ui/button";
 import {useRouter, useSearchParams} from "next/navigation";
 import {BibleBook} from "@/backend/mock/bible-book";
-import {db, Verset} from "@/lib/db";
+import {Verset} from "@/lib/db";
 import {
     DeleteVersetConfirmScreen,
     ListGrid
 } from "@/app/plaground/home/verses-list/new/infos/_components/list-grid-component";
 import VersetService from "@/service/VersetServie";
-import {useGetProfile} from "@/hooks/_screens/useAuth";
+import {useGetLocalUser, useGetProfile} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
 import {cn, removeNumberAtStart, startsWithNumber} from "@/lib/utils";
 import Image from "next/image";
 import {DArrowGoIcon} from "@/components/customize/icons";
+import {useVerses} from "@/hooks/useVerses";
 
 const versetService = new VersetService()
 
 export default function VersetInfos() {
     const [curStep, setCurStep] = React.useState<number>(1)
+    const [localId, setLocalId] = React.useState<number>()
     const [chapter, setChapter] = React.useState<number | undefined>()
     const [versets, setVersets] = React.useState<number[] | undefined>()
     const [mockedDescription, setMockedDescription] = React.useState<string>()
@@ -30,6 +32,8 @@ export default function VersetInfos() {
     const [requestDelete, setRequestDelete] = React.useState(false)
     const [loading, setLoading] = React.useState(false)
     const [clipboardContent, setClipboardContent] = useState<string>('');
+    const {user} = useGetLocalUser()
+    const {verses: myVerses} = useVerses(user?.user_id)
 
     const $q = useSearchParams()
     const {profile} = useGetProfile()
@@ -52,19 +56,20 @@ export default function VersetInfos() {
         const requestVerset = async () => {
             console.log(`requestVerset ${verset_id}`)
             if (!verset_id) return
-            const versetData = await db.verses.get(+verset_id)
+            const versetData = myVerses.find(v => String(v.id) === verset_id)
             if (versetData) {
                 setChapter(versetData.chapter_num)
-                setVersets(versetData.verses_num)
+                setLocalId(versetData.local_id)
                 setDescription(versetData.content)
                 setMockedDescription(versetData.content)
                 setCurStep(3)
+                setLocalId(versetData.local_id)
             }
             console.log(versetData)
         }
         void requestVerset()
 
-    }, [verset_id])
+    }, [myVerses, verset_id])
 
 
     React.useEffect(() => {
@@ -119,7 +124,8 @@ export default function VersetInfos() {
     const handleDeleteVerset = async () => {
         if (!verset_id) return
         const toastId = toast.loading("Supression en cour...")
-        await versetService.deleteVerset(verset_id)
+        if (localId)
+            await versetService.deleteVerset(localId)
         toast.dismiss(toastId)
         toast.success("Verset supprimé...")
         $router.push("/plaground/home/verses-list")
@@ -129,7 +135,8 @@ export default function VersetInfos() {
         if (!verset_id) return
         if (description) {
             const toastId = toast.loading("MAJ en cours...");
-            await versetService.updateVerset(verset_id, description)
+            if (localId)
+                await versetService.updateVerset(localId, description)
             toast.dismiss(toastId)
             toast.success("Verset MAJ")
         }

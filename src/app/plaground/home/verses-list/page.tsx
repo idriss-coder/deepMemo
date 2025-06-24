@@ -10,9 +10,11 @@ import {Book, bookMapById} from "@/backend/mock/bible-book";
 import {useVerses} from "@/hooks/useVerses";
 import {normalizeVersetTitle} from "@/lib/utils";
 import ButtonLoader from "@/components/customize/buttonLoader";
+import {useGetLocalUser} from "@/hooks/_screens/useAuth";
 
 export default function VersetListPage() {
-    const {myVerses} = useVerses()
+    const {user} = useGetLocalUser()
+    const {verses: myVerses, loading} = useVerses(user?.user_id)
 
     return (
         <div>
@@ -22,10 +24,10 @@ export default function VersetListPage() {
                     versetCount={myVerses ? myVerses.length : 0}
                 />
                 <NewVerset/>
-                {(!myVerses) && (
+                {(loading) && (
                     <VersesListSkeleton/>
                 )}
-                {(myVerses && myVerses.length < 5) &&
+                {(myVerses && myVerses.length < 5 && !loading) &&
                     <EmptyVerses
                         verses={myVerses}
                     />
@@ -171,14 +173,14 @@ const EmptyVerses: React.FC<EmptyVersesProps> = ({verses}) => {
             <div className="w-[341px] text-center text-[#4e5b64] text-sm font-normal leading-snug">
                 {verseCount === 0 ? (
                     <span>
-            Holà <strong>aventurier biblique</strong> ! Tu n’as pas encore
+            Holà <strong>aventurier biblique</strong> ! Tu n'as pas encore
             ajouté de verset favori. Clique ici pour en ajouter et débloquer ta
             première mission&nbsp;!
           </span>
                 ) : needed > 0 ? (
                     <span>
             Super, tu as déjà {verseCount} verset(s) favori(s) ! Encore{" "}
-                        <strong>{needed}</strong> à ajouter pour lancer l’entraînement et
+                        <strong>{needed}</strong> à ajouter pour lancer l'entraînement et
             décrocher la victoire&nbsp;!
           </span>
                 ) : (
@@ -203,6 +205,7 @@ const VersetItem: React.FC<{ verset: Verset }> = ({verset}) => {
 
     return (
         <div>
+            {/*[{JSON.stringify(verset)}]*/}
             <Link
                 href={link}
                 onClick={() => {

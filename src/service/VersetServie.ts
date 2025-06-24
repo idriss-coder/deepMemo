@@ -7,7 +7,8 @@ let isSyncing = false;
 
 export default class VersetService extends MyAppDatabase {
 
-    async deleteVerset(id: string) {
+    async deleteVerset(id: number) {
+        console.info("VersetService deleting verset", id);
         const versetData = await db.verses.get(+id)
         await db.verses.delete(+id)
         if (versetData) {
@@ -19,7 +20,7 @@ export default class VersetService extends MyAppDatabase {
         }
     }
 
-    async updateVerset(id: string, description: string) {
+    async updateVerset(id: number, description: string) {
         await db.verses.update(+id, {content: description})
         const versetData = await db.verses.get(+id)
         if (versetData) {

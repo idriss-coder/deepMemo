@@ -18,7 +18,7 @@ export const useRegister = () => {
     const [pseudo, setPseudo] = useState("");
     const [password, setPassword] = useState("");
     const [waiting, setWaiting] = useState(false);
-    const {myVerses} = useVerses()
+    const {verses: myVerses} = useVerses()
 
     const $router = useRouter()
 
@@ -96,8 +96,8 @@ export const useRegister = () => {
 
                 const timer = setTimeout(() => {
                     clearTimeout(timer)
-                    toast.dismiss(toastId)
-                }, [3000])
+                    toast.dismiss(toastID)
+                }, 3000)
 
                 setWaiting(false)
                 $router.replace("/plaground/use-term")
@@ -106,7 +106,7 @@ export const useRegister = () => {
         } catch (err: any) {
             setWaiting(false)
             toast.dismiss(toastID)
-            // Gérer l’erreur côté service (ex: email déjà utilisé, etc.)
+            // Gérer l'erreur côté service (ex: email déjà utilisé, etc.)
             toast.error(err.message || "Erreur lors de l'inscription");
         }
     };
@@ -197,7 +197,7 @@ export const useGetLocalUser = () => {
     const [showFullPseudo, setShowFullPseudo] = useState(true);
     const [hasRefetched, setHasRefetched] = useState(false);
 
-    // Fonction de récupération de l’utilisateur
+    // Fonction de récupération de l'utilisateur
     const fetchUser = async () => {
         try {
             const data = await db.profile.toArray();
@@ -205,7 +205,7 @@ export const useGetLocalUser = () => {
                 setUser(data[0]);
             }
         } catch (error) {
-            // Gérer l’erreur si nécessaire
+            // Gérer l'erreur si nécessaire
             console.error("Erreur lors du fetch user:", error);
         }
     };
@@ -227,7 +227,7 @@ export const useGetLocalUser = () => {
         }
     }, [user, hasRefetched]);
 
-    // Masque le pseudo complet après 3 secondes une fois que l’utilisateur est défini
+    // Masque le pseudo complet après 3 secondes une fois que l'utilisateur est défini
     useEffect(() => {
         if (!user) return;
         const timer = setTimeout(() => {

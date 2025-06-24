@@ -2,7 +2,9 @@ import Dexie, {Table} from 'dexie';
 
 export interface Verset {
     id?: number
+    _id?: number
     book_num: number
+    local_id?: number
     chapter_num: number
     verses_num: number[]
     content: string

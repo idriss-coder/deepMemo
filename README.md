@@ -1,3 +1,99 @@
+# DeepMemo - Application de mémorisation de versets bibliques
+
+## Fonctionnalités
+
+- **Mode Utilisateur** : Les utilisateurs peuvent créer et gérer leurs propres versets
+- **Mode Admin** : Les administrateurs peuvent créer des catégories et y ajouter des versets
+- **Interface moderne** : Design sombre avec composants shadcn/ui
+- **Gestion des versets** : CRUD complet avec sélection de livres, chapitres et versets
+
+## Architecture des Versets
+
+### Modèle de données
+
+Les versets peuvent être associés de deux manières :
+- **Par utilisateur** (`user_id`) : Pour les versets créés par les utilisateurs
+- **Par catégorie** (`category_id`) : Pour les versets créés par les admins
+
+### API Versets
+
+#### Création d'un verset
+
+```typescript
+// Pour un utilisateur
+POST /api/verses
+{
+  "book_num": 1,
+  "chapter_num": 1,
+  "verses_num": [1, 2, 3],
+  "content": "Au commencement...",
+  "user_id": "user_id_here"
+}
+
+// Pour un admin (catégorie)
+POST /api/verses
+{
+  "book_num": 1,
+  "chapter_num": 1,
+  "verses_num": [1, 2, 3],
+  "content": "Au commencement...",
+  "category_id": "category_id_here"
+}
+```
+
+#### Récupération des versets
+
+```typescript
+// Versets d'un utilisateur
+GET /api/verses?user_id=user_id_here
+
+// Versets d'une catégorie
+GET /api/verses?category_id=category_id_here
+```
+
+### Hook useVerses
+
+```typescript
+// Pour les versets d'un utilisateur
+const { verses, loading, error, createVerset } = useVerses(userId);
+
+// Pour les versets d'une catégorie
+const { verses, loading, error, createVerset } = useVerses(undefined, categoryId);
+
+// Pour les versets sans filtre (retourne une erreur)
+const { verses, loading, error, createVerset } = useVerses();
+```
+
+### Dashboard Admin
+
+Le dashboard admin permet de :
+- Créer, modifier et supprimer des catégories
+- Ajouter des versets directement aux catégories
+- Visualiser les statistiques
+
+Les versets créés via le dashboard sont automatiquement associés à la catégorie sélectionnée.
+
+## Installation
+
+```bash
+npm install
+npm run dev
+```
+
+## Structure du projet
+
+```
+src/
+├── app/
+│   ├── admin/dashboard/     # Dashboard admin
+│   ├── api/                 # Routes API
+│   └── plaground/          # Interface utilisateur
+├── components/             # Composants UI
+├── hooks/                  # Hooks personnalisés
+├── models/                 # Modèles MongoDB
+└── service/               # Services métier
+```
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

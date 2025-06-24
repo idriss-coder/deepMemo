@@ -3,7 +3,9 @@ import {Geist, Geist_Mono} from "next/font/google";
 import "./globals.css";
 import {TransitionWrapper} from "@/components/customize/transition-wrapper";
 import {Toaster} from "@/components/ui/sonner"
-
+import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {ReactQueryDevtools} from "@tanstack/react-query-devtools";
+import React from "react";
 
 const APP_NAME = "DeepMemo";
 const APP_DEFAULT_TITLE = "Entraîne-toi à memoriser les versets par coeur";
@@ -50,8 +52,6 @@ export const viewport: Viewport = {
     themeColor: "#141F25",
 };
 
-
-
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -62,6 +62,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const queryClient = new QueryClient();
 
 export default function RootLayout({
   children,
@@ -73,10 +74,13 @@ export default function RootLayout({
       <body
           className={`${geistSans.variable} ${geistMono.variable} antialiased bg-bgPrimary text-white`}
       >
-      <TransitionWrapper>
-          {children}
-      </TransitionWrapper>
-      <Toaster/>
+      <QueryClientProvider client={queryClient}>
+        <TransitionWrapper>
+            {children}
+        </TransitionWrapper>
+        <Toaster/>
+        <ReactQueryDevtools initialIsOpen={false} />
+      </QueryClientProvider>
       </body>
       </html>
   );

@@ -7,10 +7,10 @@ export interface IVerset {
     verses_num: number[]
     content: string
     createdAt: Date
-    user_id: string
+    user_id?: string
+    category_id?: string
     local_id: number
 }
-
 
 const VersetSchema = new Schema(
     {
@@ -18,7 +18,12 @@ const VersetSchema = new Schema(
         user_id: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
+            required: false, // Optionnel pour les admins
+        },
+        category_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Category",
+            required: false, // Optionnel pour les users
         },
         book_num: {type: Number, required: true},
         chapter_num: {type: Number, required: true},

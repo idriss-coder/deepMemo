@@ -160,10 +160,6 @@ export default function PlayPage() {
         }
     }, [accWinCount])
 
-    if (quizData.length === 0) {
-        return <div>Loading...</div>;
-    }
-
     // if (completed) {
     //     return <div>Quiz Completed! Great job!</div>;
     // }
@@ -203,6 +199,10 @@ export default function PlayPage() {
             setIsWin(false)
             playSound({path: SoundList.gameLoosed})
         }
+    }
+
+    if (quizData.length === 0) {
+        return <div>Loading...</div>;
     }
 
     if (currentQuestion) {
