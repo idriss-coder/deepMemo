@@ -12,7 +12,9 @@ import {getBgColorFromLetter} from "@/components/customize/utils";
 import {useProfile, useSignOut} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
 import {useCategories} from "@/app/admin/dashboard/_hooks/useCategories";
-import {ArrowRight, User2Icon} from "lucide-react";
+import {ArrowRight} from "lucide-react";
+import logoutUser from "./_ico//logout_user.png"
+import Image from "next/image";
 
 export default function HomPage() {
 
@@ -40,9 +42,10 @@ export default function HomPage() {
                     <div>
                         <h1 className="text-white text-xl font-bold font-['Feather']">Entrainements</h1>
                     </div>
-
                     <div className={"flex flex-col gap-[15px]"}>
-                        {loading ? "Un instant..." : (
+                        {loading ? (
+                            <div className={"w-full h-[79px] bg-bgPrimarySecondary rounded-[15px] animate-pulse"}></div>
+                        ) : (
                             categories?.map((ctg, k) => (
                                 <Link
                                     key={k}
@@ -111,14 +114,6 @@ const UserHero = () => {
     const {profile: user} = useProfile()
     const [settingsOpen, setSettingsOpen] = React.useState(false)
     const {handlerSignOut} = useSignOut()
-    const [show, setShow] = React.useState(false)
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setShow(true)
-            clearTimeout(timer)
-        }, 1000)
-    }, []);
 
     const onSignOut = () => {
         void handlerSignOut()
@@ -144,7 +139,7 @@ const UserHero = () => {
                 </div>
                 <div className={"flex flex-col items-center justify-center gap-8"}>
                     <Suspense fallback={<div>...</div>}>
-                        {show && <UerAvatarWrap
+                        {<UerAvatarWrap
                             variant={settingsOpen ? "sm" : "default"}
                         />}
                     </Suspense>
@@ -184,6 +179,26 @@ const UserHero = () => {
     )
 }
 
+
+const LoginButton: React.FC<{ user: any, isLoading: boolean }> = ({user, isLoading}) => {
+
+    const $router = useRouter()
+    const token = localStorage ? localStorage.getItem("_token") : null
+
+    return (
+        <>
+            {(!token || (!user && !isLoading)) && (
+                <Button
+                    variant={"green"}
+                    onClick={() => $router.push("/auth/login")}
+                    className={"absolute -bottom-4 w-64 "}
+                >
+                    Se connecter <ArrowRight className={"w-4 h-4"}/>
+                </Button>
+            )}
+        </>
+    )
+}
 const UerAvatarWrap: React.FC<{
     variant?: "default" | "sm"
     onClick?: () => void
@@ -191,10 +206,17 @@ const UerAvatarWrap: React.FC<{
           variant,
           onClick
       }) => {
+    const [show, setShow] = React.useState(false)
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShow(true)
+            clearTimeout(timer)
+        }, 10)
+    }, []);
     const {profile: user, showFullPseudo, userAvatar, isLoading} = useProfile()
     const isSM = variant === "sm";
-    const $router = useRouter()
-    const token = localStorage ? localStorage.getItem("_token") : null
+
 
     return (
         <div
@@ -223,9 +245,15 @@ const UerAvatarWrap: React.FC<{
                         >
                             {showFullPseudo ? <span className={"text-lg"}>{user.pseudo}</span> : userAvatar}
                         </motion.span>
-                    ) : <span className={"text-lg"}>
-                        <User2Icon className={"size-8"}/>
-                    </span>}
+                    ) : <div className={"size-[40px] animate-in pt-2"}>
+                        <Image
+                            width={90}
+                            height={90}
+                            src={logoutUser}
+                            alt={"Logout"}
+                            className={"w-auto"}
+                        />
+                    </div>}
                 </AnimatePresence>
             </div>
             {user ? <div
@@ -237,15 +265,11 @@ const UerAvatarWrap: React.FC<{
                 <div className="w-[7px] h-[7px] bg-[#18f850] rounded-full"/>
                 <div>Bonjour</div>
             </div> : <></>}
-            {(!token || (!user && !isLoading)) && (
-                <Button
-                    variant={"green"}
-                    onClick={() => $router.push("/auth/login")}
-                    className={"absolute -bottom-4 w-64 "}
-                >
-                    Se connecter <ArrowRight className={"w-4 h-4"}/>
-                </Button>
-            )}
+            {show ? <LoginButton
+                user={user}
+                isLoading={isLoading}
+            /> : <></>
+            }
         </div>
     );
 };
