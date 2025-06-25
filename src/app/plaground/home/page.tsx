@@ -81,7 +81,7 @@ const TrainingItem: React.FC<{ label?: string, isSecond?: boolean }> = ({label, 
                 clearTimeout(timeOd)
             }
 
-        }, 1000)
+        }, 10)
     }, [profile, load]);
 
     return (
