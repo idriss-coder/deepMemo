@@ -1,7 +1,6 @@
 "use client"
 
-import React, {useEffect} from "react";
-import UserService from "@/service/UserService";
+import React, {Suspense, useEffect} from "react";
 import {isOnline} from "@/lib/utils";
 
 
@@ -36,7 +35,9 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
     return (
         <div>
-            {children}
+            <Suspense fallback={"Loading..."}>
+                {children}
+            </Suspense>
         </div>
     )
 }

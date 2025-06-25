@@ -4,7 +4,7 @@ import {DArrowTop, DBook, DHeartGray} from "@/components/customize/icons";
 import {Button} from "@/components/ui/button";
 import {BackButton, SpinnerLoader} from "@/components/customize/utils";
 import Link from "next/link";
-import React, {useEffect, useMemo} from "react";
+import React, {Suspense, useEffect, useMemo} from "react";
 import {Book, bookMapById} from "@/backend/mock/bible-book";
 import {useVerses} from "@/hooks/useVerses";
 import {normalizeVersetTitle} from "@/lib/utils";
@@ -56,10 +56,10 @@ const VersetListView: React.FC<{ verses?: Verset[] }> = ({verses}) => {
     return (
         <div className={"flex flex-col gap-3"}>
             {verses && verses.map(v => (
-                <VersetItem
-                    verset={v}
-                    key={v.id}
-                />
+                <Suspense key={v.id} fallback={<div></div>}>
+                    <VersetItem
+                        verset={v}
+                    /></Suspense>
             ))}
         </div>
     )
