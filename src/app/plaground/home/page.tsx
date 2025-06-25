@@ -13,6 +13,7 @@ import {useProfile, useSignOut} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
 import {useCategories} from "@/app/admin/dashboard/_hooks/useCategories";
 import {ArrowRight, User2Icon} from "lucide-react";
+import {AuthManagerGuard} from "@/service/AuthManager";
 
 export default function HomPage() {
 
@@ -181,7 +182,7 @@ const UerAvatarWrap: React.FC<{
           variant,
           onClick
       }) => {
-    const {profile: user, showFullPseudo, userAvatar} = useProfile()
+    const {profile: user, showFullPseudo, userAvatar, isLoading} = useProfile()
     const isSM = variant === "sm";
     const $router = useRouter()
 
@@ -225,13 +226,16 @@ const UerAvatarWrap: React.FC<{
             >
                 <div className="w-[7px] h-[7px] bg-[#18f850] rounded-full"/>
                 <div>Bonjour</div>
-            </div> : <Button
-                variant={"green"}
-                onClick={() => $router.push("/auth/login")}
-                className={"absolute -bottom-4 w-64 "}
-            >
-                Se connecter <ArrowRight className={"w-4 h-4"}/>
-            </Button>}
+            </div> : <></>}
+            {(!AuthManagerGuard.getToken() || (!user && !isLoading)) && (
+                <Button
+                    variant={"green"}
+                    onClick={() => $router.push("/auth/login")}
+                    className={"absolute -bottom-4 w-64 "}
+                >
+                    Se connecter <ArrowRight className={"w-4 h-4"}/>
+                </Button>
+            )}
         </div>
     );
 };
