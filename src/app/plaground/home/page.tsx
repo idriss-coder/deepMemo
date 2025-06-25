@@ -3,7 +3,7 @@
 import {DBook, DCloseIcon, DSettingsIcon, OldBook} from "@/components/customize/icons";
 import {cn, maskFirstTwo} from "@/lib/utils";
 import Link from "next/link";
-import React, {useEffect, useState} from "react";
+import React, {Suspense, useEffect, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {useRouter} from "next/navigation";
 import {SoundThemRegulator} from "@/app/plaground/home/_components/sound";
@@ -13,7 +13,6 @@ import {useProfile, useSignOut} from "@/hooks/_screens/useAuth";
 import {toast} from "sonner";
 import {useCategories} from "@/app/admin/dashboard/_hooks/useCategories";
 import {ArrowRight, User2Icon} from "lucide-react";
-import {AuthManagerGuard} from "@/service/AuthManager";
 
 export default function HomPage() {
 
@@ -46,7 +45,6 @@ export default function HomPage() {
                         {loading ? "Un instant..." : (
                             categories?.map((ctg, k) => (
                                 <Link
-
                                     key={k}
                                     href={`/plaground/home/verses-list?training_id=${ctg._id}`}
                                 >
@@ -112,12 +110,22 @@ const UserHero = () => {
 
     const {profile: user} = useProfile()
     const [settingsOpen, setSettingsOpen] = React.useState(false)
-    const $router = useRouter()
     const {handlerSignOut} = useSignOut()
+    const [show, setShow] = React.useState(false)
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setShow(true)
+            clearTimeout(timer)
+        }, 1000)
+    }, []);
 
     const onSignOut = () => {
         void handlerSignOut()
-        $router.push("/auth/login")
+        if (window) {
+            window.location = `/auth/login` as unknown as Location
+        }
+
         toast.info("Vous avez été déconnecté")
     }
 
@@ -135,9 +143,11 @@ const UserHero = () => {
                     </button>
                 </div>
                 <div className={"flex flex-col items-center justify-center gap-8"}>
-                    <UerAvatarWrap
-                        variant={settingsOpen ? "sm" : "default"}
-                    />
+                    <Suspense fallback={<div>...</div>}>
+                        {show && <UerAvatarWrap
+                            variant={settingsOpen ? "sm" : "default"}
+                        />}
+                    </Suspense>
                     {settingsOpen && <>
                         <div className={"flex flex-col items-center justify-center gap-8 min-w-[250px]"}>
                             {user && <div className={"justify-start items-center gap-[26px] inline-flex"}>
@@ -157,14 +167,14 @@ const UserHero = () => {
                                     <SoundThemRegulator/>
                                 </div>
                             </div>
-                            <Button
+                            {user && <Button
                                 variant={"textRed"}
                                 onClick={() => {
                                     onSignOut()
                                 }}
                             >
                                 Déconnexion
-                            </Button>
+                            </Button>}
                         </div>
                     </>}
                 </div>
@@ -173,7 +183,6 @@ const UserHero = () => {
         </>
     )
 }
-
 
 const UerAvatarWrap: React.FC<{
     variant?: "default" | "sm"
@@ -185,6 +194,7 @@ const UerAvatarWrap: React.FC<{
     const {profile: user, showFullPseudo, userAvatar, isLoading} = useProfile()
     const isSM = variant === "sm";
     const $router = useRouter()
+    const token = localStorage ? localStorage.getItem("_token") : null
 
     return (
         <div
@@ -227,7 +237,7 @@ const UerAvatarWrap: React.FC<{
                 <div className="w-[7px] h-[7px] bg-[#18f850] rounded-full"/>
                 <div>Bonjour</div>
             </div> : <></>}
-            {(!AuthManagerGuard.getToken() || (!user && !isLoading)) && (
+            {(!token || (!user && !isLoading)) && (
                 <Button
                     variant={"green"}
                     onClick={() => $router.push("/auth/login")}

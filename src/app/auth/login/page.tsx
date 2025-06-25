@@ -36,7 +36,7 @@ export default function LoginPage() {
                     </button>
                 </Link>
                 <h1 className="text-white/20 text-lg font-['Feather'] text-center">
-                    Se connecter
+                    Se connecter à DeepMemo
                 </h1>
                 <div></div>
             </div>
