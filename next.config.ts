@@ -29,7 +29,7 @@ module.exports = withPWA({
         return [
             {
                 source: "/",
-                destination: '/auth/login',
+                destination: '/plaground/home',
                 permanent: true,
             },
         ]

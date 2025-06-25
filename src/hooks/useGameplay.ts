@@ -1,8 +1,9 @@
 // useGameplayArea.ts
 import React, {useCallback, useEffect, useState} from "react";
-import {Verset} from "@/lib/db";
 import {useVerses} from './useVerses';
-import {Difficult, shuffleArray} from "@/lib/utils"; // Hook d’exemple fourni
+import {Difficult, shuffleArray} from "@/lib/utils";
+import type {Verset} from "@/lib/db";
+import {useSearchParams} from "next/navigation";
 
 export interface QuizItem {
     id: number;               // question index (0-based)
@@ -46,12 +47,14 @@ function getRandomOptions(correct: Verset, allVerses: Verset[]): Verset[] {
 // }
 
 export function useGameplayArea() {
-    const {myVerses} = useVerses(); // exemples de versets
+    // Utilisation de React Query pour récupérer les versets
+    const $q = useSearchParams()
+    const training_id = $q.get("training_id");
+    const {verses: myVerses, loading} = useVerses(training_id ?? undefined);
     const [quizData, setQuizData] = useState<QuizItem[]>([]);
     const [currentIndex, setCurrentIndex] = useState<number>(0);
     const [completed, setCompleted] = useState<boolean>(false);
     const [difficult, setDifficult] = React.useState<Difficult>()
-
 
     // Ajout de mécaniques supplémentaires
     const [score, setScore] = useState<number>(0);
@@ -60,8 +63,8 @@ export function useGameplayArea() {
 
     /**
      * State facultatif pour conserver les questions ratées
-     * (On pourrait s’en passer si on injecte directement dans quizData,
-     *  mais c’est parfois plus clair de le gérer à part).
+     * (On pourrait s'en passer si on injecte directement dans quizData,
+     *  mais c'est parfois plus clair de le gérer à part).
      */
     const [wrongAnswers, setWrongAnswers] = useState<QuizItem[]>([]);
 
@@ -70,7 +73,6 @@ export function useGameplayArea() {
      */
     useEffect(() => {
         if (!myVerses || myVerses.length === 0) return;
-
 
         const shuffledVerses = shuffleArray(myVerses);
         const selected = shuffledVerses.slice(0, 10);
@@ -97,7 +99,7 @@ export function useGameplayArea() {
     }, [myVerses]);
 
     /**
-     * Gère la sélection d’une réponse par l’utilisateur
+     * Gère la sélection d'une réponse par l'utilisateur
      */
     const handleAnswer = useCallback(
         (selectedOption: Verset, mode?: Difficult) => {
@@ -136,7 +138,7 @@ export function useGameplayArea() {
                     } else {
                         // Retire une vie
                         //setLives((old) => Math.max(old - 1, 0));
-                        // Incrémente le nombre d’erreurs sur cette question
+                        // Incrémente le nombre d'erreurs sur cette question
                         current.missedCount += 1;
                     }
                 }
@@ -149,7 +151,7 @@ export function useGameplayArea() {
 
     /**
      * Passe à la question suivante.
-     * - Si on est à la fin et qu’il reste des questions ratées, on les ré-injecte.
+     * - Si on est à la fin et qu'il reste des questions ratées, on les ré-injecte.
      * - Sinon, on passe à la question suivante.
      * - Si plus de vies, on arrête la partie.
      */
@@ -157,10 +159,10 @@ export function useGameplayArea() {
         setQuizData((prev) => {
             const current = prev[currentIndex];
 
-            // Si la question courante n’est pas correcte, on l’ajoute à wrongAnswers
+            // Si la question courante n'est pas correcte, on l'ajoute à wrongAnswers
             if (current && !current.isCorrect) {
                 setWrongAnswers((old) => {
-                    // on peut vérifier qu’elle n’est pas déjà dedans
+                    // on peut vérifier qu'elle n'est pas déjà dedans
                     if (!old.find((q) => q.id === current.id)) {
                         return [...old, {...current}];
                     }
@@ -181,7 +183,7 @@ export function useGameplayArea() {
         if (currentIndex < quizData.length - 1) {
             setCurrentIndex((i) => i + 1);
         } else {
-            // Fin du premier passage : on regarde s’il y a des erreurs à repasser
+            // Fin du premier passage : on regarde s'il y a des erreurs à repasser
             if (wrongAnswers.length > 0) {
                 setQuizData((prev) => {
                     const extraQuestions = wrongAnswers.map((q, idx) => {
@@ -205,7 +207,7 @@ export function useGameplayArea() {
                 // On vide le tableau des erreurs car elles sont réinjectées
                 setWrongAnswers([]);
             } else {
-                // Plus de questions et plus d’erreurs
+                // Plus de questions et plus d'erreurs
                 setCompleted(true);
             }
         }
@@ -213,7 +215,7 @@ export function useGameplayArea() {
 
     /**
      * Permet de relancer UNIQUEMENT les questions ratées, par exemple via un bouton
-     * « Revoir mes erreurs ». On peut choisir d’autres stratégies (tout relancer, etc.).
+     * « Revoir mes erreurs ». On peut choisir d'autres stratégies (tout relancer, etc.).
      */
     const replayMistakes = useCallback(() => {
         if (wrongAnswers.length === 0) return;
@@ -222,7 +224,7 @@ export function useGameplayArea() {
             const options = getRandomOptions(q.target, myVerses || []);
             return {
                 ...q,
-                id: idx, // reset d’index
+                id: idx, // reset d'index
                 outputsOptions: options,
                 userAnswer: null,
                 isCorrect: false,
@@ -234,7 +236,7 @@ export function useGameplayArea() {
         setCurrentIndex(0);
         setCompleted(false);
         setWrongAnswers([]);
-        // Optionnel : on peut remettre les vies à max, ou en conserver l’état
+        // Optionnel : on peut remettre les vies à max, ou en conserver l'état
         // setLives(maxLives);
     }, [wrongAnswers, myVerses]);
 
@@ -248,7 +250,7 @@ export function useGameplayArea() {
         setScore(0);
         setLives(maxLives);
 
-        // On relance l’effet useEffect qui va recréer le quiz
+        // On relance l'effet useEffect qui va recréer le quiz
         // Une astuce consiste à faire varier artificiellement un « key »
         // ou un state dépendant, ou simplement recharger myVerses si besoin.
     }, []);
@@ -271,5 +273,8 @@ export function useGameplayArea() {
         nextQuestion,
         resetQuiz,
         replayMistakes,
+        wrongAnswers,
+        setWrongAnswers,
+        loading
     };
 }

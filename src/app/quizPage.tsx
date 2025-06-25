@@ -1,9 +1,9 @@
 'use client';
 
 import {useEffect, useState} from 'react';
-import {db, Verset} from "@/lib/db";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
+import type {Verset} from "@/lib/db";
 
 export default function QuizPage() {
 

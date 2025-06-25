@@ -110,6 +110,28 @@ export const DFlatHeart: React.FC<NavItemIconProps> = (props) => {
 }
 
 
+export const OldBook: React.FC<NavItemIconProps> = (props) => {
+    return (
+        <svg width="32" height="43" viewBox="0 0 32 43" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M31 6V37H1V6H31Z" fill="#E7D3F4"/>
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M30 0C31.1046 0 32 0.895431 32 2V9C32 10.1046 31.1046 11 30 11H2C0.89543 11 0 10.1046 0 9V2C0 0.895431 0.895431 0 2 0H30Z"
+                  fill="#EFE3F7"/>
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M31 32C31.5523 32 32 32.4477 32 33V42C32 42.5523 31.5523 43 31 43H1C0.447715 43 0 42.5523 0 42V33C0 32.4477 0.447715 32 1 32H31Z"
+                  fill="#E8DAF1"/>
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M5 20H27C27.5523 20 28 20.4477 28 21V22C28 22.5523 27.5523 23 27 23H5C4.44772 23 4 22.5523 4 22V21C4 20.4477 4.44772 20 5 20Z"
+                  fill="#C08BEE"/>
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M5 15H17C17.5523 15 18 15.4477 18 16V17C18 17.5523 17.5523 18 17 18H5C4.44772 18 4 17.5523 4 17V16C4 15.4477 4.44772 15 5 15Z"
+                  fill="#CE82FF"/>
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M5 25H22C22.5523 25 23 25.4477 23 26V27C23 27.5523 22.5523 28 22 28H5C4.44772 28 4 27.5523 4 27V26C4 25.4477 4.44772 25 5 25Z"
+                  fill="#B984EC"/>
+        </svg>
+    )
+}
 export const DBook: React.FC<NavItemIconProps> = (props) => {
     return (
         <svg width="79" height="74" viewBox="0 0 79 74" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>

@@ -40,7 +40,7 @@ export const DifficultSelectScreen: React.FC<{
                 <BackButton
                     forwardClose={true}
                     isClose={true}
-                    link="/plaground/home/verses-list"
+                    link="/plaground/home"
                     mainTitle="Quel niveau souhaite-tu jouer ?"
                 />
                 <motion.div

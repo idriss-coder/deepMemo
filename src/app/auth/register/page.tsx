@@ -26,8 +26,9 @@ export default function LoginPage() {
         <div className="flex flex-col gap-[26px]">
             <div className="flex items-center justify-between w-full">
                 <Link href="/auth/login">
-                    <button className="text-white/65">
-                        <ArrowLeftIcon/>
+                    <button
+                        className="text-white/70 hover:text-white bg-white/[0.01] hover:bg-white/5 size-10 flex items-center justify-center border border-white/[0.01] hover:border-white/[0.02] rounded-full transition-all duration-200 backdrop-blur-sm">
+                        <ArrowLeftIcon size={18} strokeWidth={2.5}/>
                     </button>
                 </Link>
                 <h1 className="text-white/20 text-lg font-['Feather'] text-center">
