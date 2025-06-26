@@ -609,6 +609,17 @@ const EndStateScreen: React.FC<{
     const isError = variant === "error"
     const isOpened = state === "opened"
 
+    const userMessage = useMemo(() => {
+        if (isError) {
+            return getRandomErrorMessage()
+        }
+        return getRandomEncouragement()
+    }, [isError, isOpened])
+
+    const missedAnswerMessage = useMemo(() => {
+        return pickRandom(missedAnswerMessages)
+    }, [])
+
     return (
         <>
             {isOpened && <TransitionScreen>
@@ -623,7 +634,7 @@ const EndStateScreen: React.FC<{
                             isError && "text-[#CE5D55]"
                         )}
                         >
-                            {isError ? getRandomErrorMessage() : getRandomEncouragement()}
+                            {userMessage}
                         </div>
                     </div>
                     {isError && <div className={"flex justify-between items-center"}>
@@ -631,7 +642,7 @@ const EndStateScreen: React.FC<{
                             <div
                                 className="text-[#92d233] text-sm font-normal leading-snug"
                             >
-                                {pickRandom(missedAnswerMessages)} :
+                                {missedAnswerMessage} :
                             </div>
                             <div className="text-white/90 text-base font-bold font-['Feather']">{correctVerset}</div>
                         </div>
