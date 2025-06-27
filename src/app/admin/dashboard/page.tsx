@@ -77,7 +77,7 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="min-h-screen bg-bgPrimary text-white">
+        <div className="min-h-screen bg-bgPrimary text-white pb-32 mb-[150px]">
             <DashboardHeader />
 
             <div className="max-w-7xl mx-auto px-6 py-8">
