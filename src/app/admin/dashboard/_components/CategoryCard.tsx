@@ -155,8 +155,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
             >
                 {/* Category Header */}
                 <div className="p-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 flex-1">
+                    <div className="flex items-center justify-between flex-col md:flex-row">
+                        <div className="flex items-center gap-4 flex-1 col-span-12 md:col-span-8 md:flex-none md:justify-between">
                             {/* Expand/Collapse Button */}
                             <button
                                 onClick={toggleExpansion}
@@ -196,7 +196,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                             </button>
 
                             {/* Category Icon & Name */}
-                            <div className="flex items-center gap-3 flex-1">
+                            <div className="flex items-center gap-3 flex-1 justify-between">
                                 <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
                                     category.isActive
                                         ? "bg-gradient-to-br from-lPrimary/20 to-lPrimary/10 border-lPrimary/30"
@@ -266,7 +266,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                             </div>
                         </div>
 
-                        {/* Toggle Active Button */}
+                        <div className="col-span-12 md:col-span-4">
+                            {/* Toggle Active Button */}
                         <Button
                             size="sm"
                             variant="ghost"
@@ -339,6 +340,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
+                        </div>
+
+                        
                         </div>
                     </div>
                

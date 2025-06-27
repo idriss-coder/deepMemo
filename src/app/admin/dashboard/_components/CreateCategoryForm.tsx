@@ -29,8 +29,10 @@ export const CreateCategoryForm: React.FC<CreateCategoryFormProps> = ({
             transition={{duration: 0.3}}
         >
             <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lPrimary/20 to-lPrimary/10 border border-lPrimary/30 flex items-center justify-center">
+                <div>
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-lPrimary/20 to-lPrimary/10 border border-lPrimary/30 flex items-center justify-center">
                     <FolderPlus className="w-5 h-5 text-lPrimary" />
+                </div>
                 </div>
                 <div>
                     <h2 className="text-xl font-bold font-['Feather'] text-white">

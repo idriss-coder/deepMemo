@@ -8,6 +8,7 @@ export async function GET(req: Request) {
     try {
         const {searchParams} = new URL(req.url);
         const includeDisabled = searchParams.get('includeDisabled') === 'true';
+        const excludeVersets = searchParams.get('excludeVersets') === 'true';
 
         // Construire la requête en fonction du paramètre includeDisabled
         let query = {};
@@ -23,7 +24,7 @@ export async function GET(req: Request) {
         // Pour chaque catégorie, récupérer les versets associés via category_id
         const categoriesWithVersets = await Promise.all(
             categories.reverse().map(async (category) => {
-                const versets = await VersetModel.find({ category_id: category._id }).lean();
+                const versets = excludeVersets ? [] : await VersetModel.find({ category_id: category._id }).lean();
                 return {
                     ...category,
                     versets: versets.reverse()

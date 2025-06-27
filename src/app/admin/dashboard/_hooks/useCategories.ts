@@ -2,17 +2,19 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {toast} from "sonner";
 
 // Hook pour récupérer les catégories avec React Query
-export const useCategories = ({includeDisabled = true}: { includeDisabled?: boolean }) => {
+export const useCategories = ({includeDisabled = true, excludeVersets = false}: { includeDisabled?: boolean, excludeVersets?: boolean }) => {
     const queryClient = useQueryClient();
 
     const {data: categories = [], isLoading: loading, error, refetch} = useQuery({
-        queryKey: ["categories", includeDisabled],
+        queryKey: ["categories", includeDisabled, excludeVersets],
         queryFn: async () => {
             const params = new URLSearchParams();
             if (includeDisabled) {
                 params.append("includeDisabled", "true");
             }
-
+            if (excludeVersets) {
+                params.append("excludeVersets", "true");
+            }
             const res = await fetch(`/api/categories?${params.toString()}`);
             const data = await res.json();
             if (data.success) {
