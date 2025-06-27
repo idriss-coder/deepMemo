@@ -18,7 +18,7 @@ import Image from "next/image";
 
 export default function HomPage() {
 
-    const {categories, loading} = useCategories({includeDisabled: false});
+    const {categories, loading} = useCategories({includeDisabled: false, excludeVersets: true});
     const $router = useRouter();
     const [showLoginModal, setShowLoginModal] = useState(false);
     const {profile} = useProfile()
@@ -46,7 +46,7 @@ export default function HomPage() {
                         {loading ? (
                             <div className={"w-full h-[79px] bg-bgPrimarySecondary rounded-[15px] animate-pulse"}></div>
                         ) : (
-                            categories?.map((ctg, k) => (
+                            categories?.map((ctg: any, k: number) => (
                                 <Link
                                     key={k}
                                     href={`/plaground/home/verses-list?training_id=${ctg._id}`}
@@ -79,13 +79,12 @@ const TrainingItem: React.FC<{ label?: string, isSecond?: boolean }> = ({label, 
     const [load, setLoad] = useState(false)
     useEffect(() => {
         const timeOd = setTimeout(() => {
-            if (!profile) {
+            if (!profile && isSecond) {
                 setLoad(false)
                 clearTimeout(timeOd)
             }
-
-        }, 10)
-    }, [profile, load]);
+        }, 700)
+    }, [profile, load, isSecond]);
 
     return (
         <button
@@ -99,7 +98,7 @@ const TrainingItem: React.FC<{ label?: string, isSecond?: boolean }> = ({label, 
             )}
         >
             {isSecond && <div
-                className={"bg-[#92D233]/10 size-1 rounded-full absolute top-4 left-4 animate-pulse"}></div>}
+                className={"bg-[#92D233]/30 size-1 rounded-full absolute top-4 left-4 animate-pulse"}></div>}
             <div
                 className="text-white/90 text-base font-bold font-['Feather'] text-left">{load ? "Un instant..." : label}</div>
             <div>
@@ -207,6 +206,10 @@ const UerAvatarWrap: React.FC<{
           onClick
       }) => {
     const [show, setShow] = React.useState(false)
+    const [clickCount, setClickCount] = useState(0)
+    const [lastClickTime, setLastClickTime] = useState(0)
+    const [showEasterEgg, setShowEasterEgg] = useState(false)
+    const router = useRouter()
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -214,21 +217,87 @@ const UerAvatarWrap: React.FC<{
             clearTimeout(timer)
         }, 10)
     }, []);
+
+    // Reset click count after 3 seconds of inactivity
+    useEffect(() => {
+        if (clickCount > 0) {
+            const timer = setTimeout(() => {
+                setClickCount(0)
+                setShowEasterEgg(false)
+            }, 3000)
+            return () => clearTimeout(timer)
+        }
+    }, [clickCount])
+
+    const handleAvatarClick = () => {
+        const now = Date.now()
+        
+        // Reset if more than 3 seconds between clicks
+        if (now - lastClickTime > 3000) {
+            setClickCount(1)
+        } else {
+            const newCount = clickCount + 1
+            setClickCount(newCount)
+            
+            // Easter egg triggered at 5 clicks
+            if (newCount === 5) {
+                setShowEasterEgg(true)
+                toast.success("🎉 Easter egg découvert ! Redirection vers l'admin...", {
+                    duration: 2000
+                })
+                
+                // Navigate to admin after a short delay
+                setTimeout(() => {
+                    router.push('/admin/dashboard')
+                }, 1500)
+                
+                // Reset after navigation
+                setTimeout(() => {
+                    setClickCount(0)
+                    setShowEasterEgg(false)
+                }, 2000)
+            }
+        }
+        
+        setLastClickTime(now)
+    }
+
     const {profile: user, showFullPseudo, userAvatar, isLoading} = useProfile()
     const isSM = variant === "sm";
-
 
     return (
         <div
             className={cn(
                 "size-[115px] bg-[#ffab33] rounded-full flex items-center justify-center relative cursor-pointer transition-transform",
-                isSM && "size-[90px]"
+                isSM && "size-[90px]",
+                showEasterEgg && "animate-pulse"
             )}
             style={{
                 background: getBgColorFromLetter(user?.pseudo),
             }}
-            onClick={onClick}
+            onClick={handleAvatarClick}
         >
+            {/* Easter egg indicator */}
+            {clickCount > 0 && clickCount < 5 && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    className="absolute -top-2 -right-2 w-6 h-6 bg-lPrimary rounded-full flex items-center justify-center text-xs font-bold text-bgPrimary"
+                >
+                    {clickCount}
+                </motion.div>
+            )}
+
+            {/* Special effect for 5th click */}
+            {showEasterEgg && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute inset-0 bg-gradient-to-r from-lPrimary to-lPrimary/50 rounded-full animate-ping"
+                />
+            )}
+
             <div
                 className="w-[35px] h-[43px] text-[#0c1216] text-4xl font-bold font-['Feather'] flex flex-col items-center justify-center">
 

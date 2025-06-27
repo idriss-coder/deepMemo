@@ -14,8 +14,10 @@ export const DashboardHeader: React.FC = () => {
             <div className="max-w-7xl mx-auto px-6 py-8">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
+                        <div className="md:hidden">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-lPrimary/20 to-lPrimary/10 border border-lPrimary/30 flex items-center justify-center">
                             <Shield className="w-6 h-6 text-lPrimary" />
+                        </div>
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold font-['Feather'] text-white">
@@ -28,7 +30,7 @@ export const DashboardHeader: React.FC = () => {
                         </div>
                     </div>
                     
-                    <div className="flex items-center gap-3">
+                    <div className="hidden md:flex items-center gap-3">
                         <div className="flex items-center gap-2 px-4 py-2 bg-bgPrimarySecondary/20 rounded-xl border border-bgPrimarySecondary/30">
                             <div className="w-2 h-2 rounded-full bg-red-400 animate-pulse" />
                             <span className="text-sm font-['Feather'] text-muted-foreground">Admin</span>
