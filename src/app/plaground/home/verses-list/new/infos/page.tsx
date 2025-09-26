@@ -145,10 +145,16 @@ export default function VersetInfos() {
     }
 
     async function handleAddVerset() {
-        if (!book_id || !chapter || !versets || !description || !user?.user_id) return
+        console.log("handleAddVerset")
+        console.log("book_id", book_id)
+        console.log("chapter", chapter)
+        console.log("versets", versets)
+        console.log("description", description)
+        console.log("user?.user_id", user._id)
+        if (!book_id || !chapter || !versets || !description || !user?._id) return
 
         const _verset = {
-            user_id: user.user_id,
+            user_id: user._id,
             book_num: +book_id,
             chapter_num: chapter,
             verses_num: versets,
