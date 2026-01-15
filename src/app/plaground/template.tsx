@@ -34,7 +34,7 @@ const Template: React.FC<{ children: React.ReactNode }> = ({children}) => {
 
 
     return (
-        <div>
+        <div className="">
             <Suspense fallback={"Loading..."}>
                 {children}
             </Suspense>

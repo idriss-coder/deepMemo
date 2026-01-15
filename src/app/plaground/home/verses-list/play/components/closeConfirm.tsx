@@ -34,7 +34,7 @@ export const CloseConfirm: React.FC<{
                 "w-full h-fit p-5 pb-10 py-[30px] flex flex-col justify-between bg-[#141f25] rounded-t-lg overflow-hidden",
                 isOpened ? "h-fit" : "h-[0%]"
             )}>
-                <div className={"flex flex-col items-center gap-[20px]"}>
+                <div className={"flex flex-col items-center gap-[20px] max-w-xl mx-auto w-full"}>
                     {icon}
                     <div className={"flex flex-col gap-[29px]"}>
                         <div className={"flex flex-col gap-[17px]"}>

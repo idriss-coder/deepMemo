@@ -36,7 +36,7 @@ export default function HomPage() {
             />
             <UserHero
             />
-            <div className={"px-[20px] py-[34px]"}>
+            <div className={"px-[20px] py-[34px] max-w-xl mx-auto"}>
                 <div className={"flex flex-col gap-[15px]"}>
 
                     <div>
